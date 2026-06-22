@@ -1,64 +1,85 @@
 import { json } from "@sveltejs/kit";
 import { db } from "$lib/server/db";
 import { news } from "$lib/server/db/schema";
-import { desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { PAGE_SIZES, getOffset, getTotalPages, normalizeQuery, parseLimit, parsePage } from "$lib/server/listing";
+import { verifyAuth } from "$lib/server/expense-tracker/auth";
 
-// GET /api/news — list news, optional ?category=tech&q=keyword&page=1&limit=20
 export async function GET({ url }) {
-	const category = url.searchParams.get("category");
-	const q = url.searchParams.get("q") || "";
-	const page = parseInt(url.searchParams.get("page") || "1", 10);
-	const limit = parseInt(url.searchParams.get("limit") || "50", 10);
-	const offset = (page - 1) * limit;
+	const category = normalizeQuery(url.searchParams.get("category"), 40);
+	const q = normalizeQuery(url.searchParams.get("q"));
+	const page = parsePage(url.searchParams.get("page"));
+	const limit = parseLimit(url.searchParams.get("limit"), PAGE_SIZES.api);
+	const offset = getOffset(page, limit);
 
-	let query = db.select().from(news);
-	let countQuery = db.select({ count: sql<number>`count(*)` }).from(news);
+	const filters = [];
+	if (category) filters.push(eq(news.category, category));
+	if (q) filters.push(or(ilike(news.title, `%${q}%`), ilike(news.excerpt, `%${q}%`)));
+	const whereClause = filters.length ? and(...filters) : undefined;
 
-	if (category) {
-		query = query.where(eq(news.category, category));
-		countQuery = countQuery.where(eq(news.category, category));
-	}
+	const [items, countResult] = await Promise.all([
+		db
+			.select()
+			.from(news)
+			.where(whereClause ?? sql`1=1`)
+			.orderBy(desc(news.publishedAt))
+			.limit(limit)
+			.offset(offset),
+		db.select({ count: sql<number>`count(*)` }).from(news).where(whereClause ?? sql`1=1`)
+	]);
 
-	if (q) {
-		const filter = or(ilike(news.title, `%${q}%`), ilike(news.excerpt, `%${q}%`));
-		query = query.where(filter);
-		countQuery = countQuery.where(filter);
-	}
-
-	const items = await query.orderBy(desc(news.publishedAt)).limit(limit).offset(offset);
-	const countResult = await countQuery;
 	const total = Number(countResult[0]?.count || 0);
-	const totalPages = Math.ceil(total / limit);
+	const totalPages = getTotalPages(total, limit);
 
-	return json({ items, page, totalPages, q, total });
+	return json(
+		{ items, page, totalPages, q, total, category, limit },
+		{
+			headers: {
+				"cache-control": "public, max-age=30, stale-while-revalidate=120"
+			}
+		}
+	);
 }
 
-// POST /api/news — create news article
 export async function POST({ request }) {
+	if (!verifyAuth(request)) {
+		return json({ error: "Unauthorized" }, { status: 401 });
+	}
+
 	const body = await request.json();
 	const { title, slug, content, excerpt, sourceUrl, sourceName, imageUrl, category, publishedAt } = body;
 
-	if (!title || !slug || !content) {
+	if (typeof title !== "string" || typeof slug !== "string" || typeof content !== "string") {
 		return json({ error: "title, slug, content required" }, { status: 400 });
 	}
 
-	// Check duplicate by slug
-	const existing = await db.select().from(news).where(eq(news.slug, slug)).limit(1);
+	const cleanTitle = title.trim();
+	const cleanSlug = slug.trim();
+	const cleanContent = content.trim();
+
+	if (!cleanTitle || !cleanSlug || !cleanContent) {
+		return json({ error: "title, slug, content required" }, { status: 400 });
+	}
+
+	const existing = await db.select().from(news).where(eq(news.slug, cleanSlug)).limit(1);
 	if (existing.length) {
 		return json({ error: "Duplicate slug" }, { status: 409 });
 	}
 
-	const [item] = await db.insert(news).values({
-		title,
-		slug,
-		content,
-		excerpt: excerpt || null,
-		sourceUrl: sourceUrl || null,
-		sourceName: sourceName || null,
-		imageUrl: imageUrl || null,
-		category: category || "general",
-		publishedAt: publishedAt ? new Date(publishedAt) : new Date()
-	}).returning();
+	const [item] = await db
+		.insert(news)
+		.values({
+			title: cleanTitle,
+			slug: cleanSlug,
+			content: cleanContent,
+			excerpt: typeof excerpt === "string" && excerpt.trim() ? excerpt.trim() : null,
+			sourceUrl: typeof sourceUrl === "string" && sourceUrl.trim() ? sourceUrl.trim() : null,
+			sourceName: typeof sourceName === "string" && sourceName.trim() ? sourceName.trim() : null,
+			imageUrl: typeof imageUrl === "string" && imageUrl.trim() ? imageUrl.trim() : null,
+			category: typeof category === "string" && category.trim() ? category.trim() : "general",
+			publishedAt: publishedAt ? new Date(publishedAt) : new Date()
+		})
+		.returning();
 
 	return json(item, { status: 201 });
 }

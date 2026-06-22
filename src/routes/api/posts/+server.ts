@@ -1,31 +1,35 @@
 import { json } from "@sveltejs/kit";
 import { db } from "$lib/server/db";
 import { posts } from "$lib/server/db/schema";
-import { desc, ilike, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { PAGE_SIZES, getOffset, getTotalPages, normalizeQuery, parseLimit, parsePage } from "$lib/server/listing";
 
 export async function GET({ url }) {
-	const q = url.searchParams.get("q") || "";
-	const page = parseInt(url.searchParams.get("page") || "1", 10);
-	const limit = parseInt(url.searchParams.get("limit") || "10", 10);
-	const offset = (page - 1) * limit;
+	const q = normalizeQuery(url.searchParams.get("q"));
+	const page = parsePage(url.searchParams.get("page"));
+	const limit = parseLimit(url.searchParams.get("limit"), PAGE_SIZES.api);
+	const offset = getOffset(page, limit);
 
-	let query = db.select().from(posts);
-
+	const filters = [eq(posts.published, true)];
 	if (q) {
-		query = query.where(
-			or(ilike(posts.title, `%${q}%`), ilike(posts.excerpt, `%${q}%`))
-		);
+		filters.push(or(ilike(posts.title, `%${q}%`), ilike(posts.excerpt, `%${q}%`)));
 	}
+	const whereClause = and(...filters);
 
-	const items = await query.orderBy(desc(posts.createdAt)).limit(limit).offset(offset);
-
-	const countResult = await db
-		.select({ count: sql<number>`count(*)` })
-		.from(posts)
-		.where(q ? or(ilike(posts.title, `%${q}%`), ilike(posts.excerpt, `%${q}%`)) : sql`1=1`);
+	const [items, countResult] = await Promise.all([
+		db.select().from(posts).where(whereClause).orderBy(desc(posts.createdAt)).limit(limit).offset(offset),
+		db.select({ count: sql<number>`count(*)` }).from(posts).where(whereClause)
+	]);
 
 	const total = Number(countResult[0]?.count || 0);
-	const totalPages = Math.ceil(total / limit);
+	const totalPages = getTotalPages(total, limit);
 
-	return json({ items, page, totalPages, q, total });
+	return json(
+		{ items, page, totalPages, q, total, limit },
+		{
+			headers: {
+				"cache-control": "public, max-age=30, stale-while-revalidate=120"
+			}
+		}
+	);
 }

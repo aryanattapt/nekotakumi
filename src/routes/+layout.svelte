@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/state';
+	import FloatingActions from '$lib/components/FloatingActions.svelte';
 	let { children } = $props();
 
 	let isAdmin = $derived(page.url.pathname.startsWith('/admin'));
@@ -41,6 +42,8 @@
 			{@render children()}
 		</main>
 
+		<FloatingActions />
+
 		<footer class="footer">
 			<p>Nekotakumi &copy; {new Date().getFullYear()}</p>
 		</footer>
@@ -55,13 +58,12 @@
 	}
 
 	.header {
-		background: var(--bg-card);
+		background: rgba(255, 255, 255, 0.78);
 		border-bottom: 1px solid var(--border);
 		position: sticky;
 		top: 0;
 		z-index: 10;
 		backdrop-filter: blur(8px);
-		background: rgba(255,255,255,0.9);
 	}
 
 	.header-inner {
@@ -77,6 +79,7 @@
 	.logo {
 		font-weight: 700;
 		font-size: 1.25rem;
+		letter-spacing: -0.02em;
 		color: var(--text) !important;
 	}
 
@@ -116,11 +119,20 @@
 	nav {
 		display: flex;
 		gap: 1.5rem;
+		align-items: center;
 	}
 
 	nav a {
+		padding: 0.5rem 0.7rem;
+		border-radius: 999px;
 		font-size: 0.9rem;
 		font-weight: 500;
+		color: var(--text);
+	}
+
+	nav a:hover {
+		background: rgba(37, 99, 235, 0.08);
+		text-decoration: none;
 	}
 
 	/* Mobile */
@@ -135,6 +147,7 @@
 			width: 100%;
 			padding: 1rem 0 0;
 			gap: 0.75rem;
+			align-items: stretch;
 		}
 
 		nav.open {
@@ -142,8 +155,9 @@
 		}
 
 		nav a {
-			padding: 0.5rem 0;
+			padding: 0.75rem 0.9rem;
 			font-size: 1rem;
+			background: rgba(37, 99, 235, 0.05);
 		}
 	}
 

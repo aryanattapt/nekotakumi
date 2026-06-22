@@ -1,23 +1,37 @@
 import { db } from "$lib/server/db";
 import { posts } from "$lib/server/db/schema";
-import { desc, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { PAGE_SIZES, getOffset, getTotalPages, normalizeQuery, parseLimit, parsePage } from "$lib/server/listing";
 
-const PER_PAGE = 10;
+export async function load({ url, setHeaders }) {
+	const q = normalizeQuery(url.searchParams.get("q"));
+	const page = parsePage(url.searchParams.get("page"));
+	const limit = parseLimit(url.searchParams.get("limit"), PAGE_SIZES.blog);
+	const offset = getOffset(page, limit);
 
-export async function load() {
+	const filters = [eq(posts.published, true)];
+	if (q) {
+		filters.push(or(ilike(posts.title, `%${q}%`), ilike(posts.excerpt, `%${q}%`)));
+	}
+
+	const whereClause = and(...filters);
+
 	try {
-		const items = await db.select().from(posts).orderBy(desc(posts.createdAt)).limit(PER_PAGE).offset(0);
-
-		const countResult = await db
-			.select({ count: sql<number>`count(*)` })
-			.from(posts);
+		const [items, countResult] = await Promise.all([
+			db.select().from(posts).where(whereClause).orderBy(desc(posts.createdAt)).limit(limit).offset(offset),
+			db.select({ count: sql<number>`count(*)` }).from(posts).where(whereClause)
+		]);
 
 		const total = Number(countResult[0]?.count || 0);
-		const totalPages = Math.ceil(total / PER_PAGE);
+		const totalPages = getTotalPages(total, limit);
 
-		return { posts: items, page: 1, totalPages, q: "", total };
+		setHeaders({
+			"cache-control": "public, max-age=60, stale-while-revalidate=300"
+		});
+
+		return { posts: items, page, totalPages, q, total, limit };
 	} catch (error) {
 		console.error("homepage load failed", error);
-		return { posts: [], page: 1, totalPages: 0, q: "", total: 0 };
+		return { posts: [], page, totalPages: 0, q, total: 0, limit };
 	}
 }

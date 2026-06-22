@@ -1,62 +1,187 @@
 <script lang="ts">
-	let { currentPath = '/admin/expense-tracker/dashboard' }: { currentPath?: string } = $props();
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 
-	const menuItems = [
-		{ href: '/admin/expense-tracker/dashboard', label: '\ud83d\udcca Dashboard' },
-		{ href: '/admin/expense-tracker/transaksi', label: '\ud83d\udccb Transaksi' },
-		{ href: '/admin/expense-tracker/kategori', label: '\ud83d\udcc2 Kategori' },
-		{ href: '/admin/expense-tracker/budget', label: '\ud83d\udcb0 Budget' },
-		{ href: '/admin/expense-tracker/laporan', label: '\ud83d\udcc4 Laporan' },
-		{ href: '/admin/expense-tracker/pengaturan', label: '\u2699\ufe0f Pengaturan' },
-	];
+	let {
+		currentPath = "/admin/expense-tracker/dashboard",
+		onLogout
+	}: {
+		currentPath?: string;
+		onLogout?: () => void | Promise<void>;
+	} = $props();
+
+	let submenuOpen = $state(false);
+
+	$effect(() => {
+		if (currentPath.startsWith("/admin/expense-tracker")) {
+			submenuOpen = true;
+		}
+	});
 
 	function isActive(href: string) {
-		return currentPath === href || currentPath.startsWith(href + '/');
+		return currentPath === href || currentPath.startsWith(href + "/");
+	}
+
+	function toggleExpenseTracker() {
+		submenuOpen = !submenuOpen;
+	}
+
+	async function handleLogout() {
+		if (onLogout) {
+			await onLogout();
+			return;
+		}
+
+		if (browser) {
+			localStorage.removeItem('expense_token');
+		}
+		await goto('/admin', { replaceState: true, noScroll: true });
 	}
 </script>
 
 <aside class="sidebar">
-	<nav>
-		{#each menuItems as item}
-			<a
-				href={item.href}
-				class:active={isActive(item.href)}
+	<nav class="nav">
+		<div class="group">
+			<button
+				type="button"
+				class="group-header"
+				aria-expanded={submenuOpen}
+				onclick={toggleExpenseTracker}
 			>
-				<span class="label">{item.label}</span>
+				<span>Expense Tracker</span>
+				<span class="chevron" class:open={submenuOpen}>▾</span>
+			</button>
+
+			{#if submenuOpen}
+				<div class="submenu">
+					<a href="/admin/expense-tracker/dashboard" class:active={isActive("/admin/expense-tracker/dashboard")}>
+						<span class="label">Dashboard</span>
+					</a>
+					<a href="/admin/expense-tracker/transaksi" class:active={isActive("/admin/expense-tracker/transaksi")}>
+						<span class="label">Transaksi</span>
+					</a>
+					<a href="/admin/expense-tracker/kategori" class:active={isActive("/admin/expense-tracker/kategori")}>
+						<span class="label">Kategori</span>
+					</a>
+					<a href="/admin/expense-tracker/budget" class:active={isActive("/admin/expense-tracker/budget")}>
+						<span class="label">Budget</span>
+					</a>
+					<a href="/admin/expense-tracker/laporan" class:active={isActive("/admin/expense-tracker/laporan")}>
+						<span class="label">Laporan</span>
+					</a>
+				</div>
+			{/if}
+		</div>
+
+		<div class="group separated">
+			<a href="/admin/expense-tracker/pengaturan" class:active={isActive("/admin/expense-tracker/pengaturan")}>
+				<span class="label">Pengaturan</span>
 			</a>
-		{/each}
+
+			<button type="button" class="logout" onclick={handleLogout}>
+				<span class="label">Log out</span>
+			</button>
+		</div>
 	</nav>
 </aside>
 
 <style>
 	.sidebar {
-		width: 220px;
+		width: 260px;
 		flex-shrink: 0;
 		padding: 1rem 0;
 	}
-	nav {
+
+	.nav {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 1rem;
 	}
-	a {
+
+	.group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		padding: 0.75rem;
+		border: 1px solid var(--border);
+		border-radius: calc(var(--radius) * 1.1);
+		background: rgba(255, 255, 255, 0.75);
+	}
+
+	.group.separated {
+		padding-top: 0.5rem;
+	}
+
+	.group-header,
+	a,
+	.logout {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.6rem 1rem;
-		border-radius: 8px;
-		color: var(--text, #1a1a2e);
+		justify-content: space-between;
+		gap: 0.75rem;
+		width: 100%;
+		padding: 0.7rem 0.85rem;
+		border: 1px solid transparent;
+		border-radius: 0.85rem;
+		color: var(--text);
 		text-decoration: none;
-		font-size: 0.9rem;
-		transition: background 0.15s;
+		font-size: 0.92rem;
+		transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 	}
-	a:hover {
-		background: #f3f4f6;
+
+	.group-header {
+		background: rgba(37, 99, 235, 0.05);
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		cursor: pointer;
+	}
+
+	.group-header:hover,
+	a:hover,
+	.logout:hover {
+		background: rgba(37, 99, 235, 0.08);
 		text-decoration: none;
+		transform: translateY(-1px);
 	}
+
+	.submenu {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		padding-left: 0.2rem;
+	}
+
+	.submenu a {
+		padding-left: 1rem;
+		background: rgba(255, 255, 255, 0.8);
+	}
+
 	a.active {
-		background: var(--accent, #7c3aed);
-		color: #fff;
-		font-weight: 600;
+		background: var(--accent);
+		color: white;
+		font-weight: 700;
+	}
+
+	.logout {
+		background: rgba(239, 68, 68, 0.06);
+		border-color: rgba(239, 68, 68, 0.15);
+		cursor: pointer;
+		font-weight: 700;
+		color: #b91c1c;
+	}
+
+	.chevron {
+		transition: transform 0.15s ease;
+	}
+
+	.chevron.open {
+		transform: rotate(180deg);
+	}
+
+	@media (max-width: 900px) {
+		.sidebar {
+			width: 100%;
+		}
 	}
 </style>

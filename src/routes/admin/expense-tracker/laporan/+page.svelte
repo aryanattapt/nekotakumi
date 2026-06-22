@@ -1,13 +1,14 @@
-<script lang=ts>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 
-	let loading = (true);
-	let error = ('');
-	let startDate = ('');
-	let endDate = ('');
-	let monthly = ([]);
-	let summary = (null);
+	let loading = $state(true);
+	let exportingFormat = $state('');
+	let error = $state('');
+	let startDate = $state('');
+	let endDate = $state('');
+	let monthly = $state<{ bulan: string; total: number }[]>([]);
+	let summary = $state<{ total: number } | null>(null);
 
 	function getToken() {
 		if (browser) return localStorage.getItem('expense_token');
@@ -21,11 +22,11 @@
 		error = '';
 		try {
 			const url = '/api/expense-tracker/reports?start=' + startDate + '&end=' + endDate;
-			const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+			const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
 			if (res.ok) {
 				const data = await res.json();
-				monthly = data.monthly;
-				summary = data.summary;
+				monthly = data.monthly || [];
+				summary = data.summary || null;
 			} else {
 				error = 'Gagal memuat laporan';
 			}
@@ -36,16 +37,41 @@
 		}
 	}
 
+	function buildFilename(format: 'csv' | 'xlsx' | 'pdf') {
+		return `laporan-pengeluaran-${startDate}_sampai_${endDate}.${format}`;
+	}
+
+	async function downloadReport(format: 'csv' | 'xlsx' | 'pdf') {
+		const token = getToken();
+		if (!token) return;
+		exportingFormat = format;
+		error = '';
+		try {
+			const url = '/api/expense-tracker/reports?start=' + startDate + '&end=' + endDate + '&format=' + format;
+			const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+			if (!res.ok) {
+				const data = await res.json().catch(() => ({}));
+				throw new Error(data.error || 'Gagal mengunduh laporan');
+			}
+			const blob = await res.blob();
+			const objectUrl = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = objectUrl;
+			link.download = buildFilename(format);
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			URL.revokeObjectURL(objectUrl);
+		} catch (e) {
+			error = String(e);
+		} finally {
+			exportingFormat = '';
+		}
+	}
+
 	function applyFilter() {
 		if (!startDate || !endDate) return;
 		fetchReport();
-	}
-
-	function downloadCSV() {
-		const token = getToken();
-		if (!token) return;
-		const url = '/api/expense-tracker/reports?start=' + startDate + '&end=' + endDate + '&format=csv';
-		window.open(url, '_blank');
 	}
 
 	onMount(() => {
@@ -56,75 +82,145 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Laporan Pengeluaran - Nekotakumi</title>
+	<meta
+		name="description"
+		content="Laporan pengeluaran Expense Tracker Nekotakumi yang mengikuti total di detail transaksi."
+	/>
+</svelte:head>
+
 <div class="laporan-page">
-	<h2>Laporan Keuangan</h2>
+	<section class="hero">
+		<div>
+			<p class="eyebrow">Expense tracker</p>
+			<h2>Laporan Pengeluaran</h2>
+			<p class="lead">Total di halaman ini mengikuti detail transaksi dan tidak menampilkan pemisahan pemasukan.</p>
+		</div>
+
+		<div class="summary-card">
+			<span class="label">Total Pengeluaran</span>
+			<strong>{summary ? `Rp ${Number(summary.total).toLocaleString('id-ID')}` : 'Rp 0'}</strong>
+		</div>
+	</section>
 
 	<div class="filter-bar">
 		<div class="filter-group">
-			<label for=start>Dari</label>
-			<input type=date id=start bind:value={startDate} />
+			<label for="start">Dari</label>
+			<input type="date" id="start" bind:value={startDate} />
 		</div>
 		<div class="filter-group">
-			<label for=end>Sampai</label>
-			<input type=date id=end bind:value={endDate} />
+			<label for="end">Sampai</label>
+			<input type="date" id="end" bind:value={endDate} />
 		</div>
 		<button class="btn" onclick={applyFilter}>Terapkan</button>
 	</div>
 
 	{#if loading}
-		<div class="loading">Memuat data...</div>
+		<div class="state-card">Memuat data...</div>
 	{:else if error}
-		<div class="error">{error}</div>
-	{:else if summary}
-		<div class="summary-cards">
-			<div class="summary-card" pemasukan>
-				<div class="label">Total Pemasukan</div>
-				<div class="value">Rp {Number(summary.total_pemasukan).toLocaleString('id-ID')}</div>
-			</div>
-			<div class="summary-card" pengeluaran>
-				<div class="label">Total Pengeluaran</div>
-				<div class="value">Rp {Number(summary.total_pengeluaran).toLocaleString('id-ID')}</div>
-			</div>
-			<div class="summary-card" selisih>
-				<div class="label">Selisih</div>
-				<div class="value" class:positif={summary.selisih >= 0}>Rp {Number(summary.selisih).toLocaleString('id-ID')}</div>
-			</div>
-		</div>
-
+		<div class="state-card error">{error}</div>
+	{:else}
 		<div class="table-container">
 			<table>
 				<thead>
 					<tr>
 						<th>Bulan</th>
-						<th>Pemasukan</th>
-						<th>Pengeluaran</th>
-						<th>Selisih</th>
+						<th>Total</th>
 					</tr>
 				</thead>
 				<tbody>
-					{#each monthly as m}
+					{#if monthly.length === 0}
 						<tr>
-							<td>{m.bulan}</td>
-							<td>Rp {Number(m.total_pemasukan).toLocaleString('id-ID')}</td>
-							<td>Rp {Number(m.total_pengeluaran).toLocaleString('id-ID')}</td>
-							<td class:positif={m.selisih >= 0}>Rp {Number(m.selisih).toLocaleString('id-ID')}</td>
+							<td colspan="2" class="empty-row">Tidak ada data pada periode ini.</td>
 						</tr>
-					{/each}
+					{:else}
+						{#each monthly as m}
+							<tr>
+								<td>{m.bulan}</td>
+								<td>Rp {Number(m.total).toLocaleString('id-ID')}</td>
+							</tr>
+						{/each}
+					{/if}
 				</tbody>
 			</table>
 		</div>
 
 		<div class="actions">
-			<button class="btn" onclick={downloadCSV}>Download CSV</button>
+			<button class="btn" onclick={() => downloadReport('csv')} disabled={!!exportingFormat || loading}>
+				{exportingFormat === 'csv' ? 'Mengunduh CSV...' : 'Download CSV'}
+			</button>
+			<button class="btn secondary" onclick={() => downloadReport('xlsx')} disabled={!!exportingFormat || loading}>
+				{exportingFormat === 'xlsx' ? 'Mengunduh XLSX...' : 'Download XLSX'}
+			</button>
+			<button class="btn secondary" onclick={() => downloadReport('pdf')} disabled={!!exportingFormat || loading}>
+				{exportingFormat === 'pdf' ? 'Mengunduh PDF...' : 'Download PDF'}
+			</button>
 		</div>
-	{:else}
-		<div class="empty">Pilih periode dan klik Terapkan untuk melihat laporan.</div>
 	{/if}
 </div>
 
 <style>
-	.laporan-page { }
-	h2 { margin-bottom: 1rem; }
+	.laporan-page {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.hero {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		gap: 1rem;
+		padding: 1.25rem;
+		border: 1px solid var(--border, #e5e7eb);
+		border-radius: calc(var(--radius, 12px) * 1.1);
+		background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(255, 255, 255, 0.96));
+	}
+
+	.eyebrow {
+		margin-bottom: 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 800;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--accent, #7c3aed);
+	}
+
+	h2 {
+		margin-bottom: 0.45rem;
+		font-size: 1.6rem;
+	}
+
+	.lead {
+		max-width: 58ch;
+		color: var(--text-muted, #6b7280);
+	}
+
+	.summary-card {
+		min-width: 220px;
+		padding: 1rem 1.15rem;
+		border-radius: 1rem;
+		background: #fff;
+		border: 1px solid var(--border, #e5e7eb);
+		box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+	}
+
+	.summary-card .label {
+		display: block;
+		margin-bottom: 0.35rem;
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--text-muted, #6b7280);
+	}
+
+	.summary-card strong {
+		font-size: 1.6rem;
+		line-height: 1.1;
+	}
+
 	.filter-bar {
 		display: flex;
 		flex-wrap: wrap;
@@ -134,65 +230,46 @@
 		background: var(--bg-card, #fff);
 		border: 1px solid var(--border, #e5e7eb);
 		border-radius: var(--radius, 12px);
-		margin-bottom: 1rem;
 	}
+
 	.filter-group {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
 	}
+
 	.filter-group label {
 		font-size: 0.8rem;
 		font-weight: 500;
 		color: var(--text-muted, #6b7280);
 	}
+
 	.filter-group input {
 		padding: 0.5rem 0.75rem;
 		border: 1px solid var(--border, #e5e7eb);
 		border-radius: 8px;
 		font-size: 0.85rem;
 	}
-	.summary-cards {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 1rem;
-		margin-bottom: 1rem;
-	}
-	.summary-card {
-		padding: 1.25rem;
-		border-radius: var(--radius, 12px);
-		border: 1px solid var(--border, #e5e7eb);
-		background: var(--bg-card, #fff);
-	}
-	.summary-card .label {
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: var(--text-muted, #6b7280);
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		margin-bottom: 0.5rem;
-	}
-	.summary-card .value {
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: var(--text, #1a1a2e);
-	}
-	.summary-card.pengeluaran .value { color: #ef4444; }
-	.summary-card.selisih .value.positif { color: #16A34A; }
-	.summary-card.selisih .value { color: #ef4444; }
+
 	.table-container {
 		overflow-x: auto;
 		background: var(--bg-card, #fff);
 		border: 1px solid var(--border, #e5e7eb);
 		border-radius: var(--radius, 12px);
-		margin-bottom: 1rem;
 	}
-	table { width: 100%; border-collapse: collapse; }
-	th, td {
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	th,
+	td {
 		padding: 0.75rem 1rem;
 		text-align: left;
 		border-bottom: 1px solid var(--border, #e5e7eb);
 	}
+
 	th {
 		font-size: 0.75rem;
 		font-weight: 600;
@@ -200,10 +277,23 @@
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
-	th:last-child, td:last-child { text-align: right; }
-	td.positif { color: #16A34A; font-weight: 600; }
-	td:not(.positif) { color: #ef4444; }
-	.actions { margin-top: 1rem; }
+
+	td:last-child,
+	th:last-child {
+		text-align: right;
+	}
+
+	.empty-row {
+		text-align: center;
+		color: var(--text-muted, #6b7280);
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+
 	.btn {
 		padding: 0.5rem 1rem;
 		border: none;
@@ -213,10 +303,38 @@
 		font-size: 0.85rem;
 		cursor: pointer;
 	}
-	.loading, .empty, .error {
+
+	.btn.secondary {
+		background: #e5e7eb;
+		color: var(--text, #1a1a2e);
+	}
+
+	.btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.state-card {
 		text-align: center;
 		padding: 2rem;
+		border-radius: 1rem;
+		background: var(--bg-card, #fff);
+		border: 1px solid var(--border, #e5e7eb);
 		color: var(--text-muted, #6b7280);
 	}
-	.error { color: #ef4444; }
+
+	.state-card.error {
+		color: #ef4444;
+	}
+
+	@media (max-width: 720px) {
+		.hero {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.summary-card {
+			min-width: 0;
+		}
+	}
 </style>

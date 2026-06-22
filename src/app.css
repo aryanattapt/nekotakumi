@@ -1,14 +1,15 @@
 :root {
-	--bg: #fafafa;
+	--bg: #f5f7fb;
 	--bg-card: #ffffff;
-	--text: #1a1a2e;
-	--text-muted: #6b7280;
-	--accent: #7c3aed;
-	--accent-hover: #6d28d9;
-	--border: #e5e7eb;
-	--radius: 12px;
-	--max-w: 720px;
-	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	--text: #0f172a;
+	--text-muted: #64748b;
+	--accent: #2563eb;
+	--accent-hover: #1d4ed8;
+	--border: rgba(148, 163, 184, 0.22);
+	--radius: 16px;
+	--max-w: 960px;
+	font-family: "Inter", "Segoe UI", sans-serif;
+	color-scheme: light;
 }
 
 * {
@@ -18,7 +19,11 @@
 }
 
 body {
-	background: var(--bg);
+	background:
+		radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 26%),
+		radial-gradient(circle at top right, rgba(124, 58, 237, 0.08), transparent 22%),
+		var(--bg);
+	background-attachment: fixed;
 	color: var(--text);
 	line-height: 1.6;
 	min-height: 100vh;
@@ -27,10 +32,18 @@ body {
 a {
 	color: var(--accent);
 	text-decoration: none;
+	transition: color 0.15s ease, opacity 0.15s ease;
 }
 
 a:hover {
 	text-decoration: underline;
+}
+
+button,
+input,
+textarea,
+select {
+	font: inherit;
 }
 
 img {
@@ -39,15 +52,15 @@ img {
 }
 
 code {
-	background: #f3f4f6;
+	background: #e2e8f0;
 	padding: 0.2em 0.4em;
 	border-radius: 4px;
 	font-size: 0.9em;
 }
 
 pre {
-	background: #1e1e2e;
-	color: #cdd6f4;
+	background: #0f172a;
+	color: #e2e8f0;
 	padding: 1rem;
 	border-radius: var(--radius);
 	overflow-x: auto;
@@ -65,4 +78,9 @@ blockquote {
 	padding-left: 1rem;
 	margin: 1.5rem 0;
 	color: var(--text-muted);
+}
+
+::selection {
+	background: rgba(37, 99, 235, 0.18);
+	color: var(--text);
 }

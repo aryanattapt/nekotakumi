@@ -19,6 +19,8 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
+    "exceljs": "^4.4.0",
+    "pdfkit": "^0.19.1",
     "postgres": "^3.4.9",
     "svelte": "^5.56.3",
     "typescript": "^6.0.3",

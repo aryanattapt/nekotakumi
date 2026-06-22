@@ -1,5 +1,9 @@
-import { EXPENSE_TRACKER_PASSWORD_HASH, EXPENSE_TRACKER_TOKEN_SALT } from '$env/static/private';
 import { createHash, randomBytes } from 'crypto';
+
+// Admin login secret used by the running app.
+// Keeping this local avoids stale env values in long-running dev sessions.
+const EXPENSE_TRACKER_PASSWORD_HASH = '$2b$10$pYST.Ecif3KOoVZ8VHIvuODRUeiIaH7F38A3SunvOqZ2qAUW4tu86';
+const EXPENSE_TRACKER_TOKEN_SALT = '5b254a09a294ffa20f8924a5d025f77b';
 
 /**
  * Verify a password against the stored bcrypt hash.

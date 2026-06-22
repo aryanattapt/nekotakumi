@@ -1,24 +1,20 @@
+import { error } from "@sveltejs/kit";
 import { db } from "$lib/server/db";
 import { news } from "$lib/server/db/schema";
-import { eq, and } from "drizzle-orm";
-import { error } from "@sveltejs/kit";
+import { and, eq } from "drizzle-orm";
 
-export async function load({ params }) {
-	try {
-		const [item] = await db
-			.select()
-			.from(news)
-			.where(and(eq(news.slug, params.slug), eq(news.category, "astronomy")))
-			.limit(1);
+export async function load({ params, setHeaders }) {
+	const [item] = await db
+		.select()
+		.from(news)
+		.where(and(eq(news.slug, params.slug), eq(news.category, "astronomy")))
+		.limit(1);
 
-		if (!item) {
-			error(404, "Berita tidak ditemukan");
-		}
+	if (!item) throw error(404, "Berita tidak ditemukan");
 
-		return { item };
-	} catch (e) {
-		if (e.status === 404) throw e;
-		console.error("astronomy-news detail load failed", e);
-		error(500, "Gagal memuat berita");
-	}
+	setHeaders({
+		"cache-control": "public, max-age=120, stale-while-revalidate=600"
+	});
+
+	return { item };
 }

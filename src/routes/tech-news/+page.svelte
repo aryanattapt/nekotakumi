@@ -1,151 +1,482 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
+	import { page } from "$app/state";
+	import { onDestroy } from "svelte";
+
 	let { data } = $props();
 
-	let items = $state(data.items);
-	let page = $state(data.page);
-	let totalPages = $state(data.totalPages);
-	let q = $state(data.q);
-	let total = $state(data.total);
 	let loading = $state(false);
-
 	let searchInput = $state("");
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
-	async function doSearch(val: string) {
-		loading = true;
-		const params = new URLSearchParams();
-		if (val.trim()) params.set("q", val.trim());
-		params.set("page", "1");
-		params.set("limit", "20");
-		params.set("category", "tech");
+	$effect(() => {
+		searchInput = data.q;
+	});
 
+	function buildUrl(nextPage: number, nextQuery = searchInput) {
+		const next = new URL(page.url);
+		const query = nextQuery.trim();
+
+		if (query) {
+			next.searchParams.set("q", query);
+		} else {
+			next.searchParams.delete("q");
+		}
+
+		if (nextPage > 1) {
+			next.searchParams.set("page", String(nextPage));
+		} else {
+			next.searchParams.delete("page");
+		}
+
+		return next;
+	}
+
+	async function goTo(nextPage: number, nextQuery = searchInput) {
+		loading = true;
 		try {
-			const res = await fetch("/api/news?" + params.toString());
-			const json = await res.json();
-			items = json.items;
-			page = json.page;
-			totalPages = json.totalPages;
-			q = json.q;
-			total = json.total;
-		} catch (e) {
-			console.error("search failed", e);
+			await goto(buildUrl(nextPage, nextQuery), {
+				replaceState: true,
+				noScroll: true
+			});
 		} finally {
 			loading = false;
 		}
 	}
 
-	function onInput(e: Event) {
-		const val = (e.target as HTMLInputElement).value;
-		searchInput = val;
+	function onInput(event: Event) {
+		searchInput = (event.target as HTMLInputElement).value;
 		clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(() => doSearch(val), 400);
+		debounceTimer = setTimeout(() => goTo(1, searchInput), 280);
 	}
 
-	async function goToPage(p: number) {
-		loading = true;
-		const params = new URLSearchParams();
-		if (q) params.set("q", q);
-		params.set("page", String(p));
-		params.set("limit", "20");
-		params.set("category", "tech");
+	function clearSearch() {
+		searchInput = "";
+		goTo(1, "");
+	}
 
-		try {
-			const res = await fetch("/api/news?" + params.toString());
-			const json = await res.json();
-			items = json.items;
-			page = json.page;
-			totalPages = json.totalPages;
-		} catch (e) {
-			console.error("pagination failed", e);
-		} finally {
-			loading = false;
+	function getPageWindow(current: number, total: number) {
+		if (total <= 1) return [];
+
+		const start = Math.max(1, current - 2);
+		const end = Math.min(total, current + 2);
+		const pages = [];
+
+		for (let p = start; p <= end; p += 1) {
+			pages.push(p);
 		}
+
+		return pages;
 	}
+
+	onDestroy(() => clearTimeout(debounceTimer));
 </script>
 
 <svelte:head>
-	<title>Tech News — Nekotakumi</title>
+	<title>Tech News - Nekotakumi</title>
 	<meta name="description" content="Tech News Nekotakumi: listing berita teknologi dari berbagai sumber." />
 </svelte:head>
 
-<div class="page">
-	<div class="hero card">
-		<p class="eyebrow">Tech news</p>
-		<h1>🖥️ Tech News</h1>
-		<p class="subtitle">Berita teknologi terbaru dari berbagai sumber.</p>
-	</div>
+<div class="page-shell">
+	<section class="hero">
+		<div class="hero-copy">
+			<p class="eyebrow">Tech news</p>
+			<h1>Teknologi yang bergerak cepat</h1>
+			<p class="subtitle">Berita teknologi terbaru dari berbagai sumber, kini lebih ringan dibuka dan lebih nyaman dibaca di ponsel.</p>
+		</div>
 
-	<div class="search-bar">
-		<input
-			type="text"
-			placeholder="Cari berita..."
-			bind:value={searchInput}
-			oninput={onInput}
-		/>
-		{#if q}
-			<button class="clear-search" onclick={() => { searchInput = ""; doSearch(""); }}>&times; Hapus filter</button>
+		<div class="hero-stats">
+			<div class="stat">
+				<span class="stat-label">Berita</span>
+				<strong>{data.total}</strong>
+			</div>
+			<div class="stat">
+				<span class="stat-label">Halaman</span>
+				<strong>{data.totalPages || 0}</strong>
+			</div>
+		</div>
+	</section>
+
+	<section class="toolbar">
+		<label class="search">
+			<span>Cari berita</span>
+			<input
+				type="search"
+				placeholder="Topik, judul, atau cuplikan..."
+				value={searchInput}
+				oninput={onInput}
+			/>
+		</label>
+
+		{#if data.q}
+			<button class="ghost-button" type="button" onclick={clearSearch} disabled={loading}>
+				Hapus filter
+			</button>
 		{/if}
-	</div>
+	</section>
 
-	{#if q}
-		<p class="search-info">Hasil pencarian untuk "<strong>{q}</strong>" — {total} ditemukan</p>
+	{#if data.q}
+		<p class="search-info">Menampilkan hasil untuk <strong>{data.q}</strong>. {data.total} berita ditemukan.</p>
 	{/if}
 
 	{#if loading}
-		<div class="loading">Memuat...</div>
-	{:else if items.length === 0}
-		<div class="empty card">{q ? "Tidak ada berita yang cocok." : "Belum ada berita teknologi."}</div>
+		<div class="state-card">Memuat berita terbaru...</div>
+	{:else if data.items.length === 0}
+		<div class="state-card empty">{data.q ? "Tidak ada berita yang cocok." : "Belum ada berita teknologi."}</div>
 	{:else}
 		<div class="posts">
-			{#each items as item}
-				<article class="card">
-					<div class="meta">
+			{#each data.items as item}
+				<article class="post-card">
+					<div class="post-topline">
 						{#if item.sourceName}
-							<span class="source">{item.sourceName}</span>
+							<span class="pill">{item.sourceName}</span>
+						{:else}
+							<span class="pill alt">Tech</span>
 						{/if}
 						<time>{new Date(item.publishedAt).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}</time>
 					</div>
 					<h2><a href={"/tech-news/" + item.slug}>{item.title}</a></h2>
 					{#if item.excerpt}<p class="excerpt">{item.excerpt}</p>{/if}
-					{#if item.sourceUrl}
-						<a class="read-more" href={item.sourceUrl} target="_blank" rel="noopener">Baca di sumber asli &rarr;</a>
-					{/if}
+					<div class="actions">
+						<a class="read-more" href={"/tech-news/" + item.slug}>Baca selengkapnya</a>
+						{#if item.sourceUrl}
+							<a class="source-link" href={item.sourceUrl} target="_blank" rel="noopener">Sumber asli</a>
+						{/if}
+					</div>
 				</article>
 			{/each}
 		</div>
 
-		{#if totalPages > 1}
-			<div class="pagination">
-				<button disabled={page <= 1} onclick={() => goToPage(page - 1)}>Sebelumnya</button>
-				<span class="page-info">Halaman {page} dari {totalPages}</span>
-				<button disabled={page >= totalPages} onclick={() => goToPage(page + 1)}>Selanjutnya</button>
-			</div>
+		{#if data.totalPages > 1}
+			<nav class="pagination" aria-label="Navigasi halaman tech news">
+				<button type="button" class="page-step" disabled={loading || data.page <= 1} onclick={() => goTo(data.page - 1)}>Sebelumnya</button>
+
+				<div class="page-numbers">
+					{#each getPageWindow(data.page, data.totalPages) as currentPage}
+						<button
+							type="button"
+							class:active={currentPage === data.page}
+							class="page-number"
+							disabled={loading}
+							onclick={() => goTo(currentPage)}
+						>
+							{currentPage}
+						</button>
+					{/each}
+				</div>
+
+				<button type="button" class="page-step" disabled={loading || data.page >= data.totalPages} onclick={() => goTo(data.page + 1)}>Selanjutnya</button>
+			</nav>
 		{/if}
 	{/if}
 </div>
 
 <style>
-	.page { max-width: var(--max-w); margin: 0 auto; padding: 2rem 1rem; }
-	.hero { margin-bottom: 1.5rem; }
-	.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
-	h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-	.eyebrow { color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-size: .8rem; }
-	.subtitle { color: var(--text-muted); }
-	.search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
-	.search-bar input { flex: 1; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); color: var(--text); font-size: 0.95rem; }
-	.clear-search { padding: 0.5rem 1rem; background: transparent; color: var(--accent) !important; border: 1px solid var(--accent); border-radius: var(--radius); cursor: pointer; font-size: 0.9rem; white-space: nowrap; }
-	.search-info { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
-	.loading { text-align: center; padding: 2rem; color: var(--text-muted); }
-	.posts { display: grid; gap: 1rem; }
-	.meta { display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom: .5rem; color: var(--text-muted); font-size: .85rem; }
-	.source { background: #eef2ff; color: var(--accent); padding: .2rem .5rem; border-radius: 999px; font-weight: 600; font-size: .8rem; }
-	h2 { margin: .35rem 0 .5rem; }
-	h2 a { color: var(--text) !important; }
-	.excerpt { color: var(--text-muted); margin-bottom: .75rem; }
-	.read-more { font-weight: 600; }
-	.empty { color: var(--text-muted); text-align: center; }
-	.pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; }
-	.pagination button { padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); color: var(--text); cursor: pointer; font-size: 0.9rem; }
-	.pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
-	.page-info { color: var(--text-muted); font-size: 0.9rem; }
+	.page-shell {
+		max-width: 1080px;
+		margin: 0 auto;
+		padding: 1.25rem 1rem 3rem;
+	}
+
+	.hero {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 1.25rem;
+		align-items: end;
+		padding: 2rem;
+		border: 1px solid var(--border);
+		border-radius: calc(var(--radius) * 1.5);
+		background:
+			radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 42%),
+			linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.86));
+		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.06);
+	}
+
+	.eyebrow {
+		display: inline-flex;
+		align-items: center;
+		text-transform: uppercase;
+		letter-spacing: 0.18em;
+		font-size: 0.72rem;
+		color: #0284c7;
+		font-weight: 700;
+		margin-bottom: 0.75rem;
+	}
+
+	h1 {
+		font-size: clamp(2.1rem, 4vw, 3.6rem);
+		line-height: 1;
+		margin-bottom: 0.75rem;
+	}
+
+	.subtitle {
+		max-width: 58ch;
+		color: var(--text-muted);
+		font-size: 1.02rem;
+	}
+
+	.hero-stats {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+	}
+
+	.stat {
+		min-width: 110px;
+		padding: 0.95rem 1rem;
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.8);
+		border: 1px solid var(--border);
+		backdrop-filter: blur(10px);
+	}
+
+	.stat-label {
+		display: block;
+		font-size: 0.72rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--text-muted);
+		margin-bottom: 0.25rem;
+	}
+
+	.stat strong {
+		font-size: 1.35rem;
+		line-height: 1;
+	}
+
+	.toolbar {
+		display: flex;
+		gap: 0.75rem;
+		align-items: end;
+		margin: 1.25rem 0 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.search {
+		flex: 1;
+		display: grid;
+		gap: 0.45rem;
+		min-width: min(100%, 320px);
+	}
+
+	.search span {
+		font-size: 0.78rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--text-muted);
+	}
+
+	.search input {
+		width: 100%;
+		padding: 0.9rem 1rem;
+		border: 1px solid var(--border);
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.92);
+		color: var(--text);
+		font-size: 1rem;
+		box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+	}
+
+	.search input:focus {
+		outline: 2px solid color-mix(in srgb, #0ea5e9 18%, transparent);
+		border-color: color-mix(in srgb, #0ea5e9 42%, white);
+	}
+
+	.ghost-button,
+	.page-step,
+	.page-number,
+	.source-link {
+		border: 1px solid var(--border);
+		background: rgba(255, 255, 255, 0.92);
+		color: var(--text);
+		border-radius: 999px;
+		padding: 0.8rem 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+	}
+
+	.ghost-button:hover,
+	.page-step:hover,
+	.page-number:hover,
+	.source-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+		border-color: color-mix(in srgb, #0ea5e9 22%, var(--border));
+		text-decoration: none;
+	}
+
+	.ghost-button:disabled,
+	.page-step:disabled,
+	.page-number:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		transform: none;
+		box-shadow: none;
+	}
+
+	.search-info {
+		color: var(--text-muted);
+		margin: 0.5rem 0 1rem;
+	}
+
+	.state-card {
+		padding: 2rem;
+		border-radius: 1.25rem;
+		border: 1px solid var(--border);
+		background: rgba(255, 255, 255, 0.88);
+		text-align: center;
+		color: var(--text-muted);
+	}
+
+	.posts {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+		margin-top: 0.75rem;
+	}
+
+	.post-card {
+		padding: 1.3rem;
+		border-radius: 1.25rem;
+		border: 1px solid var(--border);
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 252, 255, 0.94));
+		box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.post-card:hover {
+		transform: translateY(-3px);
+		box-shadow: 0 22px 44px rgba(15, 23, 42, 0.09);
+	}
+
+	.post-topline {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
+		color: var(--text-muted);
+		font-size: 0.82rem;
+	}
+
+	.pill {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.32rem 0.7rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, #0ea5e9 11%, white);
+		color: #0284c7;
+		font-size: 0.72rem;
+		font-weight: 700;
+	}
+
+	.pill.alt {
+		background: color-mix(in srgb, var(--accent) 10%, white);
+		color: var(--accent);
+	}
+
+	h2 {
+		margin-bottom: 0.55rem;
+		font-size: clamp(1.1rem, 2vw, 1.45rem);
+		line-height: 1.3;
+	}
+
+	h2 a {
+		color: var(--text);
+	}
+
+	h2 a:hover {
+		color: #0284c7;
+		text-decoration: none;
+	}
+
+	.excerpt {
+		color: var(--text-muted);
+		margin-bottom: 1rem;
+	}
+
+	.actions {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.read-more {
+		font-weight: 700;
+	}
+
+	.source-link {
+		padding: 0.7rem 0.95rem;
+		font-size: 0.9rem;
+	}
+
+	.pagination {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 1.4rem;
+		padding: 1rem;
+		border: 1px solid var(--border);
+		border-radius: 1.1rem;
+		background: rgba(255, 255, 255, 0.76);
+	}
+
+	.page-numbers {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		flex-wrap: wrap;
+	}
+
+	.page-number.active {
+		background: #0284c7;
+		border-color: #0284c7;
+		color: white;
+	}
+
+	@media (max-width: 840px) {
+		.hero {
+			grid-template-columns: 1fr;
+		}
+
+		.hero-stats {
+			justify-content: flex-start;
+		}
+
+		.posts {
+			grid-template-columns: 1fr;
+		}
+
+		.pagination {
+			justify-content: center;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.page-shell {
+			padding-inline: 0.75rem;
+		}
+
+		.hero {
+			padding: 1.25rem;
+		}
+
+		.post-card {
+			padding: 1.05rem;
+		}
+
+		.toolbar {
+			align-items: stretch;
+		}
+
+		.ghost-button {
+			width: 100%;
+		}
+	}
 </style>

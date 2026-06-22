@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import Sidebar from '$lib/components/expense-tracker/Sidebar.svelte';
+	import FloatingActions from '$lib/components/FloatingActions.svelte';
 
 	let { children } = $props();
 
@@ -15,7 +18,7 @@
 		if (browser) {
 			const stored = localStorage.getItem('expense_token');
 			if (stored) {
-				fetch('/api/expense-tracker/auth', {
+				fetch('/api/admin/auth/login', {
 					headers: { 'Authorization': `Bearer ${stored}` }
 				})
 				.then(res => {
@@ -39,7 +42,7 @@
 		loginLoading = true;
 
 		try {
-			const res = await fetch('/api/expense-tracker/auth', {
+			const res = await fetch('/api/admin/auth/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ password })
@@ -58,9 +61,10 @@
 		}
 	}
 
-	function handleLogout() {
+	async function handleLogout() {
 		token = null;
 		if (browser) localStorage.removeItem('expense_token');
+		await goto('/admin', { replaceState: true, noScroll: true });
 	}
 </script>
 
@@ -88,8 +92,14 @@
 			</form>
 		</div>
 	</div>
-{:else}
-	{@render children()}
+	{:else}
+		<div class="admin-shell">
+		<Sidebar currentPath={page.url.pathname} onLogout={handleLogout} />
+			<main class="content">
+				{@render children()}
+			</main>
+		</div>
+	<FloatingActions />
 {/if}
 
 <style>
@@ -152,5 +162,25 @@
 		color: #ef4444;
 		font-size: 0.85rem;
 		margin-bottom: 0.75rem;
+	}
+
+	.admin-shell {
+		display: flex;
+		gap: 1.5rem;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 1rem;
+		align-items: flex-start;
+	}
+
+	.content {
+		flex: 1;
+		min-width: 0;
+	}
+
+	@media (max-width: 900px) {
+		.admin-shell {
+			flex-direction: column;
+		}
 	}
 </style>

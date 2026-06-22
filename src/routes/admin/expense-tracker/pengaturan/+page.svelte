@@ -118,6 +118,39 @@
 			{/if}
 		</div>
 	</div>
+
+	<div class="card">
+		<div class="card-header">
+			<h3>Dokumentasi API</h3>
+		</div>
+		<div class="card-body">
+			<p class="doc-lead">
+				Semua endpoint expense tracker memakai header:
+				<code>Authorization: Bearer &lt;token&gt;</code>
+			</p>
+
+			<div class="doc-section">
+				<div class="doc-title">Laporan</div>
+				<code class="endpoint">GET /api/expense-tracker/reports?start=YYYY-MM-DD&amp;end=YYYY-MM-DD&amp;format=json|csv|xlsx|pdf</code>
+				<p class="doc-note">Format <code>json</code> untuk preview, <code>csv</code>/<code>xlsx</code>/<code>pdf</code> untuk unduhan. Hasilnya hanya total pengeluaran per bulan, mengikuti detail transaksi.</p>
+			</div>
+
+			<div class="doc-section">
+				<div class="doc-title">Ringkasan</div>
+				<code class="endpoint">GET /api/expense-tracker/summary?start=YYYY-MM-DD&amp;end=YYYY-MM-DD&amp;group_by=daily|monthly|yearly</code>
+			</div>
+
+			<div class="doc-section">
+				<div class="doc-title">Detail transaksi</div>
+				<code class="endpoint">GET /api/expense-tracker/detail?start=YYYY-MM-DD&amp;end=YYYY-MM-DD&amp;page=1&amp;limit=50&amp;sumber=...</code>
+			</div>
+
+			<div class="doc-section">
+				<div class="doc-title">Top pengeluaran</div>
+				<code class="endpoint">GET /api/expense-tracker/top-expenses?start=YYYY-MM-DD&amp;end=YYYY-MM-DD&amp;limit=10</code>
+			</div>
+		</div>
+	</div>
 </div>
 
 <style>
@@ -164,6 +197,37 @@
 		font-size: 0.75rem;
 		color: var(--text-muted, #6b7280);
 		margin-top: 0.25rem;
+	}
+	.doc-lead {
+		margin-bottom: 1rem;
+		color: var(--text, #1a1a2e);
+	}
+	.doc-section {
+		padding: 0.85rem 0;
+		border-top: 1px solid var(--border, #e5e7eb);
+	}
+	.doc-section:first-of-type {
+		border-top: none;
+		padding-top: 0;
+	}
+	.doc-title {
+		font-size: 0.85rem;
+		font-weight: 700;
+		margin-bottom: 0.35rem;
+	}
+	.endpoint {
+		display: block;
+		padding: 0.65rem 0.75rem;
+		border-radius: 8px;
+		background: #f8fafc;
+		border: 1px solid var(--border, #e5e7eb);
+		white-space: normal;
+		word-break: break-word;
+	}
+	.doc-note {
+		margin-top: 0.5rem;
+		color: var(--text-muted, #6b7280);
+		font-size: 0.85rem;
 	}
 	.actions { margin-top: 1rem; }
 	.btn {

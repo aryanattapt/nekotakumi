@@ -1,273 +1,464 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
+	import { page } from "$app/state";
+	import { onDestroy } from "svelte";
+
 	let { data } = $props();
 
-	let posts = $state(data.posts);
-	let page = $state(data.page);
-	let totalPages = $state(data.totalPages);
-	let q = $state(data.q);
-	let total = $state(data.total);
 	let loading = $state(false);
-
 	let searchInput = $state("");
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
-	async function doSearch(val: string) {
-		loading = true;
-		const params = new URLSearchParams();
-		if (val.trim()) params.set("q", val.trim());
-		params.set("page", "1");
-		params.set("limit", "10");
+	$effect(() => {
+		searchInput = data.q;
+	});
 
+	function buildUrl(nextPage: number, nextQuery = searchInput) {
+		const next = new URL(page.url);
+		const query = nextQuery.trim();
+
+		if (query) {
+			next.searchParams.set("q", query);
+		} else {
+			next.searchParams.delete("q");
+		}
+
+		if (nextPage > 1) {
+			next.searchParams.set("page", String(nextPage));
+		} else {
+			next.searchParams.delete("page");
+		}
+
+		return next;
+	}
+
+	async function goTo(nextPage: number, nextQuery = searchInput) {
+		loading = true;
 		try {
-			const res = await fetch("/api/posts?" + params.toString());
-			const json = await res.json();
-			posts = json.items;
-			page = json.page;
-			totalPages = json.totalPages;
-			q = json.q;
-			total = json.total;
-		} catch (e) {
-			console.error("search failed", e);
+			await goto(buildUrl(nextPage, nextQuery), {
+				replaceState: true,
+				noScroll: true
+			});
 		} finally {
 			loading = false;
 		}
 	}
 
-	function onInput(e: Event) {
-		const val = (e.target as HTMLInputElement).value;
-		searchInput = val;
+	function onInput(event: Event) {
+		searchInput = (event.target as HTMLInputElement).value;
 		clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(() => doSearch(val), 400);
+		debounceTimer = setTimeout(() => goTo(1, searchInput), 280);
 	}
 
-	async function goToPage(p: number) {
-		loading = true;
-		const params = new URLSearchParams();
-		if (q) params.set("q", q);
-		params.set("page", String(p));
-		params.set("limit", "10");
+	function clearSearch() {
+		searchInput = "";
+		goTo(1, "");
+	}
 
-		try {
-			const res = await fetch("/api/posts?" + params.toString());
-			const json = await res.json();
-			posts = json.items;
-			page = json.page;
-			totalPages = json.totalPages;
-			q = json.q;
-			total = json.total;
-		} catch (e) {
-			console.error("pagination failed", e);
-		} finally {
-			loading = false;
+	function getPageWindow(current: number, total: number) {
+		if (total <= 1) return [];
+
+		const start = Math.max(1, current - 2);
+		const end = Math.min(total, current + 2);
+		const pages = [];
+
+		for (let p = start; p <= end; p += 1) {
+			pages.push(p);
 		}
+
+		return pages;
 	}
+
+	onDestroy(() => clearTimeout(debounceTimer));
 </script>
 
 <svelte:head>
-	<title>Nekotakumi — Blog</title>
+	<title>Nekotakumi - Blog</title>
+	<meta name="description" content="Blog Nekotakumi berisi catatan, tutorial, dan tulisan ringan yang rapi, cepat, dan mudah dibaca." />
 </svelte:head>
 
-<div class="hero">
-	<h1>Nekotakumi</h1>
-	<p class="subtitle">Catatan, tutorial, dan hal-hal random</p>
-</div>
+<div class="page-shell">
+	<section class="hero">
+		<div class="hero-copy">
+			<p class="eyebrow">Blog</p>
+			<h1>Nekotakumi</h1>
+			<p class="subtitle">Catatan, tutorial, dan tulisan ringan yang dibuat lebih cepat dibaca, lebih mudah dijelajahi, dan lebih enak dilihat di layar kecil.</p>
+		</div>
 
-<div class="container">
-	<div class="search-bar">
-		<input
-			type="text"
-			placeholder="Cari postingan..."
-			bind:value={searchInput}
-			oninput={onInput}
-		/>
-		{#if q}
-			<button class="clear-search" onclick={() => { searchInput = ""; doSearch(""); }}>&times; Hapus filter</button>
+		<div class="hero-stats">
+			<div class="stat">
+				<span class="stat-label">Post</span>
+				<strong>{data.total}</strong>
+			</div>
+			<div class="stat">
+				<span class="stat-label">Halaman</span>
+				<strong>{data.totalPages || 0}</strong>
+			</div>
+		</div>
+	</section>
+
+	<section class="toolbar">
+		<label class="search">
+			<span>Cari postingan</span>
+			<input
+				type="search"
+				placeholder="Judul atau cuplikan..."
+				value={searchInput}
+				oninput={onInput}
+			/>
+		</label>
+
+		{#if data.q}
+			<button class="ghost-button" type="button" onclick={clearSearch} disabled={loading}>
+				Hapus filter
+			</button>
 		{/if}
-	</div>
+	</section>
 
-	{#if q}
-		<p class="search-info">Hasil pencarian untuk "<strong>{q}</strong>" — {total} ditemukan</p>
+	{#if data.q}
+		<p class="search-info">Menampilkan hasil untuk <strong>{data.q}</strong>. {data.total} postingan ditemukan.</p>
 	{/if}
 
 	{#if loading}
-		<div class="loading">Memuat...</div>
-	{:else if posts.length === 0}
-		<div class="empty">
-			<p>{q ? "Tidak ada postingan yang cocok." : "Belum ada postingan."}</p>
-		</div>
+		<div class="state-card">Memuat konten terbaru...</div>
+	{:else if data.posts.length === 0}
+		<div class="state-card empty">{data.q ? "Tidak ada postingan yang cocok." : "Belum ada postingan yang dipublikasikan."}</div>
 	{:else}
 		<div class="posts">
-			{#each posts as post}
+			{#each data.posts as post}
 				<article class="post-card">
-					<time>{new Date(post.createdAt).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}</time>
-					<h2><a href="/blog/{post.slug}">{post.title}</a></h2>
+					<div class="post-topline">
+						<time>{new Date(post.createdAt).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}</time>
+						<span class="pill">Artikel</span>
+					</div>
+					<h2><a href={"/blog/" + post.slug}>{post.title}</a></h2>
 					{#if post.excerpt}
 						<p class="excerpt">{post.excerpt}</p>
 					{/if}
-					<a href="/blog/{post.slug}" class="read-more">Baca selengkapnya &rarr;</a>
+					<a href={"/blog/" + post.slug} class="read-more">Baca selengkapnya</a>
 				</article>
 			{/each}
 		</div>
 
-		{#if totalPages > 1}
-			<div class="pagination">
-				<button disabled={page <= 1} onclick={() => goToPage(page - 1)}>Sebelumnya</button>
-				<span class="page-info">Halaman {page} dari {totalPages}</span>
-				<button disabled={page >= totalPages} onclick={() => goToPage(page + 1)}>Selanjutnya</button>
-			</div>
+		{#if data.totalPages > 1}
+			<nav class="pagination" aria-label="Navigasi halaman blog">
+				<button type="button" class="page-step" disabled={loading || data.page <= 1} onclick={() => goTo(data.page - 1)}>Sebelumnya</button>
+
+				<div class="page-numbers">
+					{#each getPageWindow(data.page, data.totalPages) as currentPage}
+						<button
+							type="button"
+							class:active={currentPage === data.page}
+							class="page-number"
+							disabled={loading}
+							onclick={() => goTo(currentPage)}
+						>
+							{currentPage}
+						</button>
+					{/each}
+				</div>
+
+				<button type="button" class="page-step" disabled={loading || data.page >= data.totalPages} onclick={() => goTo(data.page + 1)}>Selanjutnya</button>
+			</nav>
 		{/if}
 	{/if}
 </div>
 
 <style>
-	.hero {
-		text-align: center;
-		padding: 4rem 1rem 3rem;
-		background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #faf5ff 100%);
+	.page-shell {
+		max-width: 1080px;
+		margin: 0 auto;
+		padding: 1.25rem 1rem 3rem;
 	}
 
-	.hero h1 {
-		font-size: 2.5rem;
-		font-weight: 800;
-		margin-bottom: 0.5rem;
-		background: linear-gradient(135deg, #7c3aed, #a855f7);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+	.hero {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 1.25rem;
+		align-items: end;
+		padding: 2rem;
+		border: 1px solid var(--border);
+		border-radius: calc(var(--radius) * 1.5);
+		background:
+			radial-gradient(circle at top left, rgba(124, 58, 237, 0.16), transparent 42%),
+			linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(250, 250, 255, 0.8));
+		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.06);
+	}
+
+	.eyebrow {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		text-transform: uppercase;
+		letter-spacing: 0.18em;
+		font-size: 0.72rem;
+		color: var(--accent);
+		font-weight: 700;
+		margin-bottom: 0.75rem;
+	}
+
+	h1 {
+		font-size: clamp(2.2rem, 4vw, 4rem);
+		line-height: 0.98;
+		margin-bottom: 0.75rem;
 	}
 
 	.subtitle {
+		max-width: 58ch;
 		color: var(--text-muted);
-		font-size: 1.1rem;
+		font-size: 1.02rem;
 	}
 
-	.container {
-		max-width: var(--max-w);
-		margin: 0 auto;
-		padding: 2rem 1rem;
-	}
-
-	.search-bar {
+	.hero-stats {
 		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		justify-content: flex-end;
 	}
 
-	.search-bar input {
-		flex: 1;
-		padding: 0.6rem 0.8rem;
+	.stat {
+		min-width: 110px;
+		padding: 0.95rem 1rem;
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.72);
 		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		background: var(--bg-card);
-		color: var(--text);
-		font-size: 0.95rem;
+		backdrop-filter: blur(10px);
 	}
 
-	.clear-search {
-		padding: 0.5rem 1rem;
-		background: transparent;
-		color: var(--accent) !important;
-		border: 1px solid var(--accent);
-		border-radius: var(--radius);
+	.stat-label {
+		display: block;
+		font-size: 0.72rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--text-muted);
+		margin-bottom: 0.25rem;
+	}
+
+	.stat strong {
+		font-size: 1.35rem;
+		line-height: 1;
+	}
+
+	.toolbar {
+		display: flex;
+		gap: 0.75rem;
+		align-items: end;
+		margin: 1.25rem 0 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.search {
+		flex: 1;
+		display: grid;
+		gap: 0.45rem;
+		min-width: min(100%, 320px);
+	}
+
+	.search span {
+		font-size: 0.78rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--text-muted);
+	}
+
+	.search input {
+		width: 100%;
+		padding: 0.9rem 1rem;
+		border: 1px solid var(--border);
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.92);
+		color: var(--text);
+		font-size: 1rem;
+		box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+	}
+
+	.search input:focus {
+		outline: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+		border-color: color-mix(in srgb, var(--accent) 45%, white);
+	}
+
+	.ghost-button,
+	.page-step,
+	.page-number {
+		border: 1px solid var(--border);
+		background: rgba(255, 255, 255, 0.92);
+		color: var(--text);
+		border-radius: 999px;
+		padding: 0.8rem 1rem;
+		font-weight: 600;
 		cursor: pointer;
-		font-size: 0.9rem;
-		white-space: nowrap;
+		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+	}
+
+	.ghost-button:hover,
+	.page-step:hover,
+	.page-number:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+		border-color: color-mix(in srgb, var(--accent) 24%, var(--border));
+	}
+
+	.ghost-button:disabled,
+	.page-step:disabled,
+	.page-number:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		transform: none;
+		box-shadow: none;
 	}
 
 	.search-info {
 		color: var(--text-muted);
-		font-size: 0.9rem;
-		margin-bottom: 1rem;
+		margin: 0.5rem 0 1rem;
 	}
 
-	.loading {
-		text-align: center;
+	.state-card {
 		padding: 2rem;
+		border-radius: 1.25rem;
+		border: 1px solid var(--border);
+		background: rgba(255, 255, 255, 0.88);
+		text-align: center;
 		color: var(--text-muted);
 	}
 
-	.empty {
-		text-align: center;
-		padding: 3rem;
+	.state-card.empty {
 		color: var(--text-muted);
 	}
 
 	.posts {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+		margin-top: 0.75rem;
 	}
 
 	.post-card {
-		background: var(--bg-card);
+		padding: 1.3rem;
+		border-radius: 1.25rem;
 		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		padding: 1.5rem;
-		transition: box-shadow 0.2s, transform 0.2s;
+		background:
+			linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 252, 255, 0.94));
+		box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
 	}
 
 	.post-card:hover {
-		box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-		transform: translateY(-2px);
+		transform: translateY(-3px);
+		box-shadow: 0 22px 44px rgba(15, 23, 42, 0.09);
 	}
 
-	.post-card time {
-		font-size: 0.8rem;
+	.post-topline {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
 		color: var(--text-muted);
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		font-size: 0.82rem;
 	}
 
-	.post-card h2 {
-		margin: 0.5rem 0;
-		font-size: 1.35rem;
+	.pill {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.32rem 0.7rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--accent) 10%, white);
+		color: var(--accent);
+		font-size: 0.72rem;
+		font-weight: 700;
 	}
 
-	.post-card h2 a {
-		color: var(--text) !important;
+	h2 {
+		margin-bottom: 0.55rem;
+		font-size: clamp(1.1rem, 2vw, 1.45rem);
+		line-height: 1.3;
 	}
 
-	.post-card h2 a:hover {
-		color: var(--accent) !important;
+	h2 a {
+		color: var(--text);
+	}
+
+	h2 a:hover {
+		color: var(--accent);
+		text-decoration: none;
 	}
 
 	.excerpt {
 		color: var(--text-muted);
-		font-size: 0.95rem;
-		margin-bottom: 0.75rem;
+		margin-bottom: 1rem;
 	}
 
 	.read-more {
-		font-size: 0.9rem;
-		font-weight: 500;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		font-weight: 700;
 	}
 
 	.pagination {
 		display: flex;
-		justify-content: center;
 		align-items: center;
-		gap: 1rem;
-		margin-top: 2rem;
-	}
-
-	.pagination button {
-		padding: 0.5rem 1rem;
+		justify-content: space-between;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 1.4rem;
+		padding: 1rem;
 		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		background: var(--bg-card);
-		color: var(--text);
-		cursor: pointer;
-		font-size: 0.9rem;
+		border-radius: 1.1rem;
+		background: rgba(255, 255, 255, 0.76);
 	}
 
-	.pagination button:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
+	.page-numbers {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		flex-wrap: wrap;
 	}
 
-	.page-info {
-		color: var(--text-muted);
-		font-size: 0.9rem;
+	.page-number.active {
+		background: var(--accent);
+		border-color: var(--accent);
+		color: white;
+	}
+
+	@media (max-width: 840px) {
+		.hero {
+			grid-template-columns: 1fr;
+		}
+
+		.hero-stats {
+			justify-content: flex-start;
+		}
+
+		.posts {
+			grid-template-columns: 1fr;
+		}
+
+		.pagination {
+			justify-content: center;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.page-shell {
+			padding-inline: 0.75rem;
+		}
+
+		.hero {
+			padding: 1.25rem;
+		}
+
+		.post-card {
+			padding: 1.05rem;
+		}
+
+		.toolbar {
+			align-items: stretch;
+		}
+
+		.ghost-button {
+			width: 100%;
+		}
 	}
 </style>

@@ -1,13 +1,5 @@
-<script lang="ts">
-	import { page } from '$app/state';
-	import AdminSidebar from '$lib/components/expense-tracker/AdminSidebar.svelte';
-
-	let currentPath = $derived(page.url.pathname);
-</script>
-
 <div class="admin-welcome">
-	<AdminSidebar {currentPath} />
-	<main class="content">
+	<div class="content">
 		<h1>👋 Selamat Datang di Admin Area</h1>
 		<p class="subtitle">Pilih menu di sidebar untuk mulai.</p>
 		<div class="quick-links">
@@ -20,7 +12,7 @@
 				<span class="label">Detail Transaksi</span>
 			</a>
 		</div>
-	</main>
+	</div>
 </div>
 
 <style>
@@ -29,25 +21,30 @@
 		gap: 1.5rem;
 		max-width: 1100px;
 		margin: 0 auto;
-		padding: 1rem;
+		padding: 1rem 0;
 	}
+
 	.content {
 		flex: 1;
 		min-width: 0;
 	}
+
 	h1 {
 		font-size: 1.5rem;
 		margin-bottom: 0.5rem;
 	}
+
 	.subtitle {
 		color: var(--text-muted, #6b7280);
 		margin-bottom: 2rem;
 	}
+
 	.quick-links {
 		display: flex;
 		gap: 1rem;
 		flex-wrap: wrap;
 	}
+
 	.quick-card {
 		display: flex;
 		align-items: center;
@@ -61,12 +58,20 @@
 		font-weight: 500;
 		transition: box-shadow 0.2s, transform 0.2s;
 	}
+
 	.quick-card:hover {
-		box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 		transform: translateY(-2px);
 		text-decoration: none;
 	}
+
 	.icon {
 		font-size: 1.5rem;
+	}
+
+	@media (max-width: 900px) {
+		.admin-welcome {
+			padding-top: 0;
+		}
 	}
 </style>
