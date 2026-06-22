@@ -1,0 +1,29 @@
+services:
+  apt-stg-nekotakumi:
+    image: apt-stg-nekotakumi:latest
+    container_name: apt-stg-nekotakumi
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DOCKER_BUILDKIT: 0
+        DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/nekotakumi
+        EXPENSE_TRACKER_DATABASE_URL: postgres://elaina:elaina_tx_2026@127.0.0.1:5432/transaksi
+        EXPENSE_TRACKER_PASSWORD_HASH: $$2b$$10$$zLtxBKSk3jeEmCv7McKTB.JeYpWG3iS/P8Om8zvDUBFMWgDYWCCti
+        EXPENSE_TRACKER_TOKEN_SALT: 5b254a09a294ffa20f8924a5d025f77b
+    network_mode: host
+    environment:
+      - PORT=40005
+      - DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/nekotakumi
+      - EXPENSE_TRACKER_DATABASE_URL=postgres://elaina:elaina_tx_2026@127.0.0.1:5432/transaksi
+      - EXPENSE_TRACKER_PASSWORD_HASH=$$2b$$10$$zLtxBKSk3jeEmCv7McKTB.JeYpWG3iS/P8Om8zvDUBFMWgDYWCCti
+      - EXPENSE_TRACKER_TOKEN_SALT=5b254a09a294ffa20f8924a5d025f77b
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 32M

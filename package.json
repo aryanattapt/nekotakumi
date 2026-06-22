@@ -1,0 +1,32 @@
+{
+  "name": "nekotakumi",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sveltejs/kit": "^2.65.2",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9",
+    "svelte": "^5.56.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-node": "^5.5.4",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.22.4"
+  }
+}
