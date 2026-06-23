@@ -1,23 +1,23 @@
 services:
   apt-stg-nekotakumi:
     image: apt-stg-nekotakumi:latest
-    container_name: apt-stg-nekotakumi
+    container_name: elaina
     build:
       context: .
       dockerfile: Dockerfile
       args:
         DOCKER_BUILDKIT: 0
-        DATABASE_URL: ${DATABASE_URL}
-        EXPENSE_TRACKER_DATABASE_URL: ${EXPENSE_TRACKER_DATABASE_URL}
-        EXPENSE_TRACKER_PASSWORD_HASH: ${EXPENSE_TRACKER_PASSWORD_HASH}
-        EXPENSE_TRACKER_TOKEN_SALT: ${EXPENSE_TRACKER_TOKEN_SALT}
+        DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/nekotakumi
+        EXPENSE_TRACKER_DATABASE_URL: postgres://elaina:elaina_tx_2026@127.0.0.1:5432/transaksi
+        EXPENSE_TRACKER_PASSWORD_HASH: 13125182b1312518101312518pYST.Ecif3KOoVZ8VHIvuODRUeiIaH7F38A3SunvOqZ2qAUW4tu86
+        EXPENSE_TRACKER_TOKEN_SALT: 5b254a09a294ffa20f8924a5d025f77b
     network_mode: host
     environment:
       - PORT=40005
-      - DATABASE_URL=${DATABASE_URL}
-      - EXPENSE_TRACKER_DATABASE_URL=${EXPENSE_TRACKER_DATABASE_URL}
-      - EXPENSE_TRACKER_PASSWORD_HASH=${EXPENSE_TRACKER_PASSWORD_HASH}
-      - EXPENSE_TRACKER_TOKEN_SALT=${EXPENSE_TRACKER_TOKEN_SALT}
+      - DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/nekotakumi
+      - EXPENSE_TRACKER_DATABASE_URL=postgres://elaina:elaina_tx_2026@127.0.0.1:5432/transaksi
+      - EXPENSE_TRACKER_PASSWORD_HASH=13125182b1312518101312518pYST.Ecif3KOoVZ8VHIvuODRUeiIaH7F38A3SunvOqZ2qAUW4tu86
+      - EXPENSE_TRACKER_TOKEN_SALT=5b254a09a294ffa20f8924a5d025f77b
     restart: always
     deploy:
       resources:
