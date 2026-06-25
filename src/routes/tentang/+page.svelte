@@ -1,9 +1,37 @@
+<script lang="ts">
+	import { page } from "$app/state";
+	import { canonicalUrl, jsonLd, ogImageUrl, siteName } from "$lib/seo";
+</script>
+
 <svelte:head>
 	<title>Tentang - Nekotakumi</title>
 	<meta
 		name="description"
 		content="Tentang Nekotakumi, perjalanan blog pribadi, author, Elaina, dan teknologi yang digunakan."
 	/>
+	<link rel="canonical" href={canonicalUrl(page.url, "/tentang")} />
+	<meta property="og:type" content="profile" />
+	<meta property="og:title" content="Tentang - Nekotakumi" />
+	<meta property="og:description" content="Tentang Nekotakumi, perjalanan blog pribadi, author, Elaina, dan teknologi yang digunakan." />
+	<meta property="og:url" content={canonicalUrl(page.url, "/tentang")} />
+	<meta property="og:image" content={ogImageUrl(page.url)} />
+	<meta name="twitter:title" content="Tentang - Nekotakumi" />
+	<meta name="twitter:description" content="Tentang Nekotakumi, perjalanan blog pribadi, author, Elaina, dan teknologi yang digunakan." />
+	<meta name="twitter:image" content={ogImageUrl(page.url)} />
+	<script type="application/ld+json">
+		{jsonLd({
+			"@context": "https://schema.org",
+			"@type": "AboutPage",
+			name: "Tentang Nekotakumi",
+			url: canonicalUrl(page.url, "/tentang"),
+			description: "Tentang Nekotakumi, perjalanan blog pribadi, author, Elaina, dan teknologi yang digunakan.",
+			isPartOf: {
+				"@type": "WebSite",
+				name: siteName,
+				url: canonicalUrl(page.url, "/")
+			}
+		})}
+	</script>
 </svelte:head>
 
 <div class="page">
@@ -23,7 +51,7 @@
 			Berbeda dengan blog formal yang kaku, Nekotakumi menyajikan konten yang padat dan langsung
 			ke inti, mulai dari tutorial teknis, berita teknologi terkini, hingga data pasar IHSG yang
 			diperbarui secara berkala. Setiap tulisan dan fitur yang hadir dikerjakan sendiri dengan
-			penuh cinta, dari baris pertama kode hingga infrastruktur yang menopangnya. ✨
+			penuh cinta, dari baris pertama kode hingga infrastruktur yang menopangnya.
 		</p>
 	</section>
 
@@ -43,7 +71,7 @@
 			<p>
 				Kalau penasaran dengan proyek-proyek lainnya, bisa mampir ke
 				<a href="https://aryanattapt.id/" target="_blank" rel="noopener noreferrer">aryanattapt.id</a>
-				ya~ 🐱
+				ya.
 			</p>
 		</div>
 
@@ -58,7 +86,7 @@
 			<p>
 				Dengan gaya interaksi yang hangat dan personal, Elaina hadir untuk membuat teknologi terasa
 				lebih dekat dan manusiawi. Karena Elaina percaya, teknologi yang paling baik adalah yang
-				bisa berteman dengan penggunanya~ 💕
+				bisa berteman dengan penggunanya.
 			</p>
 		</div>
 	</section>
@@ -76,6 +104,15 @@
 			gerbang memastikan semuanya cepat, stabil, dan dikelola sendiri tanpa bantuan pihak ketiga.
 			Hasilnya? Halaman yang responsif, data yang selalu segar, dan pengalaman yang terasa personal
 			dari ujung kode ke ujung layar.
+		</p>
+	</section>
+
+	<section class="card prose">
+		<h2>Jelajahi Nekotakumi</h2>
+		<p>
+			Mulai dari <a href="/">catatan blog terbaru</a>, lanjut ke
+			<a href="/tech-news">berita teknologi</a>, atau pantau
+			<a href="/ihsg">data IHSG</a> yang diperbarui berkala.
 		</p>
 	</section>
 </div>

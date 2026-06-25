@@ -9,8 +9,8 @@
 		onApply: (filters: { month: number; year: number }) => void;
 	} = $props();
 
-	let selMonth = $state(month);
-	let selYear = $state(year);
+	let selMonth = $state(new Date().getMonth() + 1);
+	let selYear = $state(new Date().getFullYear());
 
 	const months = [
 		{ value: 1, label: 'Januari' },

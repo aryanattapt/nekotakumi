@@ -59,6 +59,14 @@
 		editing = null;
 	}
 
+	function handleBackdropClick(event: MouseEvent) {
+		if (event.target === event.currentTarget) closeModal();
+	}
+
+	function handleBackdropKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') closeModal();
+	}
+
 	async function handleSave() {
 		const token = getToken();
 		if (!token) return;
@@ -66,8 +74,8 @@
 		try {
 			const method = editing ? 'PUT' : 'POST';
 			const body = editing
-				? { id: editing.id, nama: formName, tipe: formTipe, icon: formIcon }
-				: { nama: formName, tipe: formTipe, icon: formIcon };
+				? { id: editing.id, nama: formNama, tipe: formTipe, icon: formIcon }
+				: { nama: formNama, tipe: formTipe, icon: formIcon };
 			const res = await fetch('/api/expense-tracker/categories', {
 				method,
 				headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -156,8 +164,8 @@
 </div>
 
 {#if showModal}
-	<div class="modal-overlay" onclick={closeModal}>
-		<div class="modal" onclick={(e) => e.stopPropagation()}>
+	<div class="modal-overlay" role="presentation" tabindex="-1" onclick={handleBackdropClick} onkeydown={handleBackdropKeydown}>
+		<div class="modal">
 			<h3>{editing ? 'Edit Kategori' : '+ Tambah Kategori'}</h3>
 			<div class="form-group">
 				<label for="nama">Nama Kategori</label>

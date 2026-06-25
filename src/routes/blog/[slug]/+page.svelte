@@ -1,9 +1,49 @@
 <script lang="ts">
+	import { page } from "$app/state";
+	import { canonicalUrl, jsonLd, ogImageUrl, siteName } from "$lib/seo";
+
 	let { data } = $props();
+
+	const description = $derived(data.post.excerpt || data.post.title);
+	const articleUrl = $derived(canonicalUrl(page.url, `/blog/${data.post.slug}`));
+	const shareText = $derived(`${data.post.title} - Nekotakumi`);
+	const encodedArticleUrl = $derived(encodeURIComponent(articleUrl));
+	const encodedShareText = $derived(encodeURIComponent(shareText));
 </script>
 
 <svelte:head>
 	<title>{data.post.title} - Nekotakumi</title>
+	<meta name="description" content={description} />
+	<link rel="canonical" href={articleUrl} />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content={`${data.post.title} - Nekotakumi`} />
+	<meta property="og:description" content={description} />
+	<meta property="og:url" content={articleUrl} />
+	<meta property="og:image" content={ogImageUrl(page.url)} />
+	<meta property="article:published_time" content={new Date(data.post.createdAt).toISOString()} />
+	<meta property="article:modified_time" content={new Date(data.post.updatedAt).toISOString()} />
+	<meta name="twitter:title" content={`${data.post.title} - Nekotakumi`} />
+	<meta name="twitter:description" content={description} />
+	<meta name="twitter:image" content={ogImageUrl(page.url)} />
+	<script type="application/ld+json">
+		{jsonLd({
+			"@context": "https://schema.org",
+			"@type": "BlogPosting",
+			headline: data.post.title,
+			description,
+			url: articleUrl,
+			datePublished: new Date(data.post.createdAt).toISOString(),
+			dateModified: new Date(data.post.updatedAt).toISOString(),
+			author: {
+				"@type": "Person",
+				name: "Arya"
+			},
+			publisher: {
+				"@type": "Organization",
+				name: siteName
+			}
+		})}
+	</script>
 </svelte:head>
 
 <div class="page-shell">
@@ -22,6 +62,18 @@
 	<div class="back-nav">
 		<a href="/" class="back-link">&larr; Kembali ke blog</a>
 	</div>
+
+	<nav class="related-links" aria-label="Konten terkait">
+		<a href="/tech-news">Baca tech news</a>
+		<a href="/ihsg">Pantau IHSG</a>
+		<a href="/tentang">Tentang Nekotakumi</a>
+	</nav>
+
+	<nav class="share-links" aria-label="Bagikan artikel">
+		<a href={`https://twitter.com/intent/tweet?url=${encodedArticleUrl}&text=${encodedShareText}`} target="_blank" rel="noopener noreferrer">Bagikan ke X</a>
+		<a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedArticleUrl}`} target="_blank" rel="noopener noreferrer">Bagikan ke LinkedIn</a>
+		<a href={`https://api.whatsapp.com/send?text=${encodedShareText}%20${encodedArticleUrl}`} target="_blank" rel="noopener noreferrer">Bagikan ke WhatsApp</a>
+	</nav>
 </div>
 
 <style>
@@ -111,6 +163,36 @@
 		border-radius: 999px;
 		background: rgba(255, 255, 255, 0.9);
 		font-weight: 600;
+	}
+
+	.related-links {
+		display: flex;
+		justify-content: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 1rem;
+	}
+
+	.related-links a {
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		padding: 0.7rem 0.95rem;
+		background: rgba(255, 255, 255, 0.9);
+		font-weight: 700;
+	}
+
+	.share-links {
+		display: flex;
+		justify-content: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 0.75rem;
+	}
+
+	.share-links a {
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		font-weight: 700;
 	}
 
 	@media (max-width: 640px) {

@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { page } from "$app/state";
+	import { canonicalUrl, jsonLd, ogImageUrl, siteName } from "$lib/seo";
+
 	let { data } = $props();
 
 	type StockRow = {
@@ -41,12 +44,37 @@
 </script>
 
 <svelte:head>
-	<title>IHSG — Nekotakumi</title>
+	<title>IHSG - Nekotakumi</title>
+	<meta name="description" content="Pantau data IHSG, USD/IDR, emas, dan ringkasan sektor pasar Indonesia terbaru di Nekotakumi." />
+	<meta name="robots" content="noindex, follow" />
+	<link rel="canonical" href={canonicalUrl(page.url, "/ihsg")} />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="IHSG - Nekotakumi" />
+	<meta property="og:description" content="Pantau data IHSG, USD/IDR, emas, dan ringkasan sektor pasar Indonesia terbaru di Nekotakumi." />
+	<meta property="og:url" content={canonicalUrl(page.url, "/ihsg")} />
+	<meta property="og:image" content={ogImageUrl(page.url)} />
+	<meta name="twitter:title" content="IHSG - Nekotakumi" />
+	<meta name="twitter:description" content="Pantau data IHSG, USD/IDR, emas, dan ringkasan sektor pasar Indonesia terbaru di Nekotakumi." />
+	<meta name="twitter:image" content={ogImageUrl(page.url)} />
+	<script type="application/ld+json">
+		{jsonLd({
+			"@context": "https://schema.org",
+			"@type": "Dataset",
+			name: "Data IHSG Nekotakumi",
+			description: "Data IHSG, USD/IDR, emas, dan ringkasan sektor pasar Indonesia.",
+			url: canonicalUrl(page.url, "/ihsg"),
+			creator: {
+				"@type": "Organization",
+				name: siteName
+			},
+			dateModified: data.lastUpdated ? new Date(data.lastUpdated).toISOString() : undefined
+		})}
+	</script>
 </svelte:head>
 
 <div class="page">
 	<div class="hero">
-		<h1>📈 IHSG</h1>
+		<h1>IHSG</h1>
 		<p class="subtitle">Data pasar Indonesia terbaru.</p>
 	{#if data.lastUpdated}
 		<p class="update-time">Update terakhir: {new Date(data.lastUpdated).toLocaleString("id-ID", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })} WIB</p>
@@ -104,7 +132,7 @@
 							{/if}
 							{#if stocks.length}
 								<div class="stock-count">
-									📈{up.length} naik 📉{down.length} turun
+									{up.length} naik, {down.length} turun
 								</div>
 								<div class="stock-list">
 									{#if topUp.length}
@@ -131,6 +159,12 @@
 			{/if}
 		</section>
 	{/if}
+
+	<section class="related-links" aria-label="Konten terkait">
+		<a href="/">Baca catatan blog</a>
+		<a href="/tech-news">Ikuti tech news</a>
+		<a href="/tentang">Tentang Nekotakumi</a>
+	</section>
 </div>
 
 <style>
@@ -156,5 +190,7 @@
 	.stock-row.red { color: #dc2626; }
 	.stock-item { white-space: nowrap; }
 	.empty { color: var(--text-muted); }
+	.related-links { margin-top: 1.5rem; display: flex; gap: .75rem; flex-wrap: wrap; }
+	.related-links a { border: 1px solid var(--border); border-radius: 999px; padding: .7rem .95rem; background: var(--bg-card); font-weight: 700; }
 	@media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
 </style>

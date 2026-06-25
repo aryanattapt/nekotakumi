@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
+	import { canonicalUrl, jsonLd, ogImageUrl, siteName } from "$lib/seo";
 
 	let { data } = $props();
 	let loading = $state(false);
@@ -47,6 +48,30 @@
 <svelte:head>
 	<title>Astronomy News - Nekotakumi</title>
 	<meta name="description" content="Astronomy News Nekotakumi: berita astronomi dan luar angkasa terbaru." />
+	<meta name="robots" content="noindex, follow" />
+	<link rel="canonical" href={canonicalUrl(page.url, "/astronomy-news")} />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="Astronomy News - Nekotakumi" />
+	<meta property="og:description" content="Berita astronomi dan luar angkasa terbaru dari Nekotakumi." />
+	<meta property="og:url" content={canonicalUrl(page.url, "/astronomy-news")} />
+	<meta property="og:image" content={ogImageUrl(page.url)} />
+	<meta name="twitter:title" content="Astronomy News - Nekotakumi" />
+	<meta name="twitter:description" content="Berita astronomi dan luar angkasa terbaru dari Nekotakumi." />
+	<meta name="twitter:image" content={ogImageUrl(page.url)} />
+	<script type="application/ld+json">
+		{jsonLd({
+			"@context": "https://schema.org",
+			"@type": "CollectionPage",
+			name: "Astronomy News - Nekotakumi",
+			url: canonicalUrl(page.url, "/astronomy-news"),
+			description: "Berita astronomi dan luar angkasa terbaru dari Nekotakumi.",
+			isPartOf: {
+				"@type": "WebSite",
+				name: siteName,
+				url: canonicalUrl(page.url, "/")
+			}
+		})}
+	</script>
 </svelte:head>
 
 <div class="page-shell">
@@ -67,6 +92,12 @@
 				<strong>{data.totalPages || 0}</strong>
 			</div>
 		</div>
+	</section>
+
+	<section class="related-links" aria-label="Jelajahi konten terkait">
+		<a href="/">Catatan blog</a>
+		<a href="/tech-news">Tech news</a>
+		<a href="/tentang">Tentang Nekotakumi</a>
 	</section>
 
 	{#if loading}
@@ -287,6 +318,21 @@
 		border: 1px solid var(--border);
 		border-radius: 1.1rem;
 		background: rgba(255, 255, 255, 0.76);
+	}
+
+	.related-links {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin: 1rem 0 0.25rem;
+	}
+
+	.related-links a {
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		padding: 0.7rem 0.95rem;
+		background: rgba(255, 255, 255, 0.88);
+		font-weight: 700;
 	}
 
 	.page-numbers {
