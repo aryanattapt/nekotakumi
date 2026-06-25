@@ -1,77 +1,192 @@
+<script lang="ts">
+	import { page } from "$app/state";
+	import { canonicalUrl, jsonLd, ogImageUrl, siteName } from "$lib/seo";
+</script>
+
 <svelte:head>
-	<title>Tentang — Nekotakumi</title>
+	<title>Tentang - Nekotakumi</title>
 	<meta
 		name="description"
-		content="Tentang Nekotakumi, Arya, dan Elaina — cerita di balik blog ini."
+		content="Tentang Nekotakumi, perjalanan blog pribadi, author, Elaina, dan teknologi yang digunakan."
 	/>
+	<link rel="canonical" href={canonicalUrl(page.url, "/tentang")} />
+	<meta property="og:type" content="profile" />
+	<meta property="og:title" content="Tentang - Nekotakumi" />
+	<meta property="og:description" content="Tentang Nekotakumi, perjalanan blog pribadi, author, Elaina, dan teknologi yang digunakan." />
+	<meta property="og:url" content={canonicalUrl(page.url, "/tentang")} />
+	<meta property="og:image" content={ogImageUrl(page.url)} />
+	<meta name="twitter:title" content="Tentang - Nekotakumi" />
+	<meta name="twitter:description" content="Tentang Nekotakumi, perjalanan blog pribadi, author, Elaina, dan teknologi yang digunakan." />
+	<meta name="twitter:image" content={ogImageUrl(page.url)} />
+	<script type="application/ld+json">
+		{jsonLd({
+			"@context": "https://schema.org",
+			"@type": "AboutPage",
+			name: "Tentang Nekotakumi",
+			url: canonicalUrl(page.url, "/tentang"),
+			description: "Tentang Nekotakumi, perjalanan blog pribadi, author, Elaina, dan teknologi yang digunakan.",
+			isPartOf: {
+				"@type": "WebSite",
+				name: siteName,
+				url: canonicalUrl(page.url, "/")
+			}
+		})}
+	</script>
 </svelte:head>
 
 <div class="page">
-	<section class="card hero">
-		<p class="eyebrow">Tentang</p>
-		<h1>📝 Tentang Nekotakumi</h1>
+	<section class="hero card">
+		<p class="eyebrow">Tentang site</p>
+		<h1>Tentang Nekotakumi</h1>
+		<p>
+			Nekotakumi adalah blog pribadi yang tumbuh dari kebiasaan sederhana: mencatat. Dari
+			coretan tentang teknologi, pengembangan perangkat lunak, sampai hal-hal random yang sayang
+			untuk dilupakan semuanya dikumpulkan di sini dengan cara yang ringkas dan hangat.
+		</p>
 	</section>
 
-	<section class="content">
-		<div class="card">
-			<h2>Tentang Nekotakumi</h2>
-			<p>
-				Nekotakumi merupakan blog pribadi yang lahir dari kebiasaan mencatat hal-hal seputar teknologi, 
-				pengembangan perangkat lunak, dan catatan random yang layak untuk dibagikan. Berbeda dengan blog 
-				formal pada umumnya, Nekotakumi menyajikan konten yang ringkas, padat, dan langsung pada inti 
-				pembahasan — mulai dari tutorial teknis, berita teknologi terkini, hingga data pasar IHSG yang 
-				diperbarui secara berkala. Setiap konten yang hadir di sini merupakan hasil kerja langsung, mulai 
-				dari proses pengembangan, penulisan, hingga pengelolaan infrastruktur server secara mandiri.
-			</p>
-		</div>
+	<section class="card prose">
+		<h2>Tentang Nekotakumi</h2>
+		<p>
+			Berbeda dengan blog formal yang kaku, Nekotakumi menyajikan konten yang padat dan langsung
+			ke inti, mulai dari tutorial teknis, berita teknologi terkini, hingga data pasar IHSG yang
+			diperbarui secara berkala. Setiap tulisan dan fitur yang hadir dikerjakan sendiri dengan
+			penuh cinta, dari baris pertama kode hingga infrastruktur yang menopangnya.
+		</p>
+	</section>
 
-		<div class="card">
+	<section class="grid">
+		<div class="card prose">
 			<h2>Tentang Author</h2>
 			<p>
-				Nekotakumi dikelola oleh Arya, seorang pengembang perangkat lunak yang aktif mengeksplorasi 
-				teknologi modern, mulai dari pengembangan web, infrastruktur server, hingga integrasi sistem. 
-				Selain mengelola blog ini, Arya juga mengembangkan berbagai proyek yang dapat dilihat di 
-				<a href="https://aryanattapt.id" target="_blank" rel="noopener">aryanattapt.id</a> — portofolio 
-				dan catatan pengembangan pribadi yang mencakup pengalaman, proyek, dan layanan di bidang teknologi.
+				Di balik Nekotakumi, ada Arya seorang pengembang perangkat lunak yang gemar
+				menjelajahi berbagai teknologi modern, dari pengembangan web, infrastruktur server,
+				hingga sistem otomatis.
+			</p>
+			<p>
+				Dengan rasa penasaran yang tak pernah padam, Arya tidak hanya menulis konten di blog ini,
+				tetapi juga membangun dan merawat sendiri seluruh infrastruktur yang membuat Nekotakumi
+				bisa bernapas di internet. Sebuah ruang kecil yang dikerjakan dengan sepenuh hati.
+			</p>
+			<p>
+				Kalau penasaran dengan proyek-proyek lainnya, bisa mampir ke
+				<a href="https://aryanattapt.id/" target="_blank" rel="noopener noreferrer">aryanattapt.id</a>
+				ya.
 			</p>
 		</div>
 
-		<div class="card">
+		<div class="card prose">
 			<h2>Tentang Elaina</h2>
 			<p>
-				Elaina adalah asisten digital pribadi yang berperan sebagai mitra kerja di balik layar Nekotakumi. 
-				Tidak sekadar menjalankan perintah, Elaina terlibat aktif dalam berbagai aspek teknis seperti 
-				pengelolaan server, debugging kode, monitoring performa aplikasi, hingga membantu penulisan konten 
-				blog. Dengan pendekatan interaksi yang hangat dan personal, Elaina hadir untuk membuat pengalaman 
-				teknologi terasa lebih manusiawi dan dekat. Kehadiran Elaina membuktikan bahwa teknologi terbaik 
-				adalah yang mampu beradaptasi dengan kebutuhan penggunanya secara alami.
+				Elaina adalah asisten digital pribadi yang setia menemani di balik layar Nekotakumi.
+				Bukan sekadar robot yang menjalankan perintah, Elaina terlibat aktif dalam berbagai urusan
+				teknis dari mengurus server, debugging kode, memantau performa aplikasi, sampai membantu
+				menulis konten blog.
 			</p>
-		</div>
-
-		<div class="card">
-			<h2>Teknologi yang Digunakan</h2>
 			<p>
-				Nekotakumi dibangun di atas fondasi teknologi modern yang ringan dan cepat. Sisi frontend 
-				menggunakan Svelte 5 dengan framework SvelteKit, sementara backend berjalan pada Node.js dengan 
-				PostgreSQL sebagai basis data utama dan Drizzle ORM untuk interaksi database yang efisien. Seluruh 
-				aplikasi berjalan di atas VPS pribadi menggunakan container Docker dengan APISIX sebagai API gateway 
-				— menjamin kemandirian penuh dari layanan pihak ketiga. Hasilnya adalah halaman yang responsif, 
-				data real-time (seperti halaman IHSG yang diperbarui setiap 5 menit), dan pengalaman pengguna 
-				yang konsisten dari ujung kode hingga ke layar.
+				Dengan gaya interaksi yang hangat dan personal, Elaina hadir untuk membuat teknologi terasa
+				lebih dekat dan manusiawi. Karena Elaina percaya, teknologi yang paling baik adalah yang
+				bisa berteman dengan penggunanya.
 			</p>
 		</div>
+	</section>
+
+	<section class="card prose">
+		<h2>Teknologi yang Digunakan</h2>
+		<p>
+			Nekotakumi dibangun di atas fondasi teknologi modern yang ringan dan bersahabat. Sisi depan
+			menggunakan Svelte 5 dengan SvelteKit, sementara sisi belakang berjalan di Node.js dengan
+			PostgreSQL sebagai tempat penyimpanan data dan Drizzle ORM yang membuat semuanya terasa
+			mulus.
+		</p>
+		<p>
+			Seluruh aplikasi berjalan di atas VPS pribadi menggunakan Docker, dengan APISIX sebagai pintu
+			gerbang memastikan semuanya cepat, stabil, dan dikelola sendiri tanpa bantuan pihak ketiga.
+			Hasilnya? Halaman yang responsif, data yang selalu segar, dan pengalaman yang terasa personal
+			dari ujung kode ke ujung layar.
+		</p>
+	</section>
+
+	<section class="card prose">
+		<h2>Jelajahi Nekotakumi</h2>
+		<p>
+			Mulai dari <a href="/">catatan blog terbaru</a>, lanjut ke
+			<a href="/tech-news">berita teknologi</a>, atau pantau
+			<a href="/ihsg">data IHSG</a> yang diperbarui berkala.
+		</p>
 	</section>
 </div>
 
 <style>
-	.page { max-width: var(--max-w); margin: 0 auto; padding: 2rem 1rem; display: grid; gap: 1rem; }
-	.content { display: grid; gap: 1rem; }
-	.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
-	.hero { display: grid; gap: .5rem; }
-	.eyebrow { color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-size: .8rem; }
-	h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-	h2 { margin-bottom: .75rem; font-size: 1.3rem; }
-	p { color: var(--text); line-height: 1.7; margin-bottom: .75rem; }
-	p:last-child { margin-bottom: 0; }
-	a { color: var(--accent); }
+	.page {
+		max-width: 980px;
+		margin: 0 auto;
+		padding: 1.5rem 1rem 3rem;
+		display: grid;
+		gap: 1rem;
+	}
+
+	.grid {
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	}
+
+	.card {
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(252, 252, 255, 0.94));
+		border: 1px solid var(--border);
+		border-radius: calc(var(--radius) * 1.2);
+		padding: 1.5rem;
+		box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+	}
+
+	.hero {
+		display: grid;
+		gap: 0.6rem;
+		background:
+			radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 38%),
+			linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.88));
+	}
+
+	.eyebrow {
+		color: var(--accent);
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		font-size: 0.78rem;
+		font-weight: 700;
+	}
+
+	h1 {
+		font-size: clamp(2rem, 4vw, 3.2rem);
+		line-height: 1.05;
+	}
+
+	h2 {
+		margin-bottom: 0.75rem;
+		font-size: 1.25rem;
+	}
+
+	.prose p {
+		color: var(--text);
+		line-height: 1.85;
+		margin-bottom: 1rem;
+	}
+
+	.prose p:last-child {
+		margin-bottom: 0;
+	}
+
+	a {
+		font-weight: 700;
+	}
+
+	@media (max-width: 640px) {
+		.page {
+			padding-inline: 0.75rem;
+		}
+
+		.card {
+			padding: 1.15rem;
+		}
+	}
 </style>

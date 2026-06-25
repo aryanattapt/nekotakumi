@@ -81,7 +81,6 @@
 					placeholder="Password"
 					bind:value={password}
 					disabled={loginLoading}
-					autofocus
 				/>
 				{#if error}
 					<div class="error">{error}</div>

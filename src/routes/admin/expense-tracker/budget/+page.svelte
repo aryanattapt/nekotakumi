@@ -80,6 +80,14 @@
 		editing = null;
 	}
 
+	function handleBackdropClick(event: MouseEvent) {
+		if (event.target === event.currentTarget) closeModal();
+	}
+
+	function handleBackdropKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') closeModal();
+	}
+
 	async function handleSave() {
 		const token = getToken();
 		if (!token) return;
@@ -170,7 +178,7 @@
 							<td>{b.bulan}/{b.tahun}</td>
 							<td class="actions">
 								<button class="btn-mini" onclick={() => openEdit(b)}>Edit</button>
-								<button class="btn-mini" delete onclick={() => handleDelete(b.id)}>Hapus</button>
+								<button class="btn-mini delete" onclick={() => handleDelete(b.id)}>Hapus</button>
 							</td>
 						</tr>
 					{/each}
@@ -181,8 +189,8 @@
 </div>
 
 {#if showModal}
-	<div class="modal-overlay" onclick={closeModal}>
-		<div class="modal" onclick={(e) => e.stopPropagation()}>
+	<div class="modal-overlay" role="presentation" tabindex="-1" onclick={handleBackdropClick} onkeydown={handleBackdropKeydown}>
+		<div class="modal">
 			<h3>{editing ? 'Edit Budget' : '+ Tambah Budget'}</h3>
 			<div class="form-group">
 				<label for=ktg>Kategori</label>
@@ -215,7 +223,7 @@
 				</div>
 			</div>
 			<div class="modal-actions">
-				<button class="btn" secondary onclick={closeModal}>Batal</button>
+				<button class="btn secondary" onclick={closeModal}>Batal</button>
 				<button class="btn" onclick={handleSave} disabled={loading}>Simpan</button>
 			</div>
 		</div>

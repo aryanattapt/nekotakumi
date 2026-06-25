@@ -1,10 +1,52 @@
 <script lang="ts">
+	import { page } from "$app/state";
+	import { canonicalUrl, jsonLd, ogImageUrl, siteName } from "$lib/seo";
+
 	let { data } = $props();
+
+	const description = $derived(data.item.excerpt || data.item.title);
+	const articleUrl = $derived(canonicalUrl(page.url, `/tech-news/${data.item.slug}`));
+	const canonicalHref = $derived(data.item.sourceUrl || articleUrl);
+	const imageUrl = $derived(ogImageUrl(page.url, data.item.imageUrl));
+	const shareText = $derived(`${data.item.title} - Nekotakumi`);
+	const encodedArticleUrl = $derived(encodeURIComponent(articleUrl));
+	const encodedShareText = $derived(encodeURIComponent(shareText));
 </script>
 
 <svelte:head>
 	<title>{data.item.title} - Tech News Nekotakumi</title>
-	<meta name="description" content={data.item.excerpt || data.item.title} />
+	<meta name="description" content={description} />
+	<meta name="robots" content="noindex, follow" />
+	<link rel="canonical" href={canonicalHref} />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content={`${data.item.title} - Tech News Nekotakumi`} />
+	<meta property="og:description" content={description} />
+	<meta property="og:url" content={articleUrl} />
+	<meta property="og:image" content={imageUrl} />
+	<meta name="twitter:image" content={imageUrl} />
+	<meta property="article:published_time" content={new Date(data.item.publishedAt).toISOString()} />
+	<meta name="twitter:title" content={`${data.item.title} - Tech News Nekotakumi`} />
+	<meta name="twitter:description" content={description} />
+	<script type="application/ld+json">
+		{jsonLd({
+			"@context": "https://schema.org",
+			"@type": "NewsArticle",
+			headline: data.item.title,
+			description,
+			url: articleUrl,
+			image: imageUrl,
+			datePublished: new Date(data.item.publishedAt).toISOString(),
+			author: {
+				"@type": "Organization",
+				name: data.item.sourceName || siteName
+			},
+			publisher: {
+				"@type": "Organization",
+				name: siteName
+			},
+			isBasedOn: data.item.sourceUrl || undefined
+		})}
+	</script>
 </svelte:head>
 
 <div class="page-shell">
@@ -28,6 +70,18 @@
 				<a href={data.item.sourceUrl} target="_blank" rel="noopener">Baca di sumber asli &rarr;</a>
 			</div>
 		{/if}
+
+		<nav class="related-links" aria-label="Konten terkait">
+			<a href="/tech-news">Tech news lain</a>
+			<a href="/">Catatan blog</a>
+			<a href="/ihsg">Data IHSG</a>
+		</nav>
+
+		<nav class="share-links" aria-label="Bagikan berita">
+			<a href={`https://twitter.com/intent/tweet?url=${encodedArticleUrl}&text=${encodedShareText}`} target="_blank" rel="noopener noreferrer">Bagikan ke X</a>
+			<a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedArticleUrl}`} target="_blank" rel="noopener noreferrer">Bagikan ke LinkedIn</a>
+			<a href={`https://api.whatsapp.com/send?text=${encodedShareText}%20${encodedArticleUrl}`} target="_blank" rel="noopener noreferrer">Bagikan ke WhatsApp</a>
+		</nav>
 	</article>
 </div>
 
@@ -152,6 +206,34 @@
 	}
 
 	.source-link a {
+		font-weight: 700;
+	}
+
+	.related-links {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 1rem;
+	}
+
+	.related-links a {
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		padding: 0.7rem 0.95rem;
+		background: rgba(255, 255, 255, 0.9);
+		font-weight: 700;
+	}
+
+	.share-links {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 0.75rem;
+	}
+
+	.share-links a {
+		color: var(--text-muted);
+		font-size: 0.9rem;
 		font-weight: 700;
 	}
 

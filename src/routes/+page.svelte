@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
+	import { canonicalUrl, defaultDescription, jsonLd, ogImageUrl, siteName } from "$lib/seo";
 	import { onDestroy } from "svelte";
 
 	let { data } = $props();
@@ -74,7 +75,32 @@
 
 <svelte:head>
 	<title>Nekotakumi - Blog</title>
-	<meta name="description" content="Blog Nekotakumi berisi catatan, tutorial, dan tulisan ringan yang rapi, cepat, dan mudah dibaca." />
+	<meta name="description" content={defaultDescription} />
+	<meta name="robots" content={data.q ? "noindex, follow" : "index, follow"} />
+	<link rel="canonical" href={canonicalUrl(page.url, "/")} />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="Nekotakumi - Blog" />
+	<meta property="og:description" content={defaultDescription} />
+	<meta property="og:url" content={canonicalUrl(page.url, "/")} />
+	<meta property="og:image" content={ogImageUrl(page.url)} />
+	<meta name="twitter:title" content="Nekotakumi - Blog" />
+	<meta name="twitter:description" content={defaultDescription} />
+	<meta name="twitter:image" content={ogImageUrl(page.url)} />
+	<script type="application/ld+json">
+		{jsonLd({
+			"@context": "https://schema.org",
+			"@type": "WebSite",
+			name: siteName,
+			url: canonicalUrl(page.url, "/"),
+			description: defaultDescription,
+			inLanguage: "id-ID",
+			potentialAction: {
+				"@type": "SearchAction",
+				target: `${canonicalUrl(page.url, "/")}?q={search_term_string}`,
+				"query-input": "required name=search_term_string"
+			}
+		})}
+	</script>
 </svelte:head>
 
 <div class="page-shell">
@@ -95,6 +121,12 @@
 				<strong>{data.totalPages || 0}</strong>
 			</div>
 		</div>
+	</section>
+
+	<section class="related-links" aria-label="Jelajahi konten Nekotakumi">
+		<a href="/tech-news">Tech news terbaru</a>
+		<a href="/ihsg">Data IHSG</a>
+		<a href="/tentang">Tentang Nekotakumi</a>
 	</section>
 
 	<section class="toolbar">
@@ -407,6 +439,21 @@
 		border: 1px solid var(--border);
 		border-radius: 1.1rem;
 		background: rgba(255, 255, 255, 0.76);
+	}
+
+	.related-links {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin: 1rem 0 0.25rem;
+	}
+
+	.related-links a {
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		padding: 0.7rem 0.95rem;
+		background: rgba(255, 255, 255, 0.88);
+		font-weight: 700;
 	}
 
 	.page-numbers {

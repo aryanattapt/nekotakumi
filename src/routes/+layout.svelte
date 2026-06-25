@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { page } from '$app/state';
 	import FloatingActions from '$lib/components/FloatingActions.svelte';
+	import { defaultDescription, defaultLocale, siteName } from '$lib/seo';
 	let { children } = $props();
 
 	let isAdmin = $derived(page.url.pathname.startsWith('/admin'));
@@ -15,6 +16,16 @@
 		menuOpen = false;
 	}
 </script>
+
+<svelte:head>
+	<meta name="application-name" content={siteName} />
+	<meta name="author" content="Arya" />
+	<meta name="robots" content={isAdmin ? "noindex, nofollow" : "index, follow"} />
+	<meta property="og:site_name" content={siteName} />
+	<meta property="og:locale" content={defaultLocale} />
+	<meta property="og:description" content={defaultDescription} />
+	<meta name="twitter:card" content="summary_large_image" />
+</svelte:head>
 
 {#if isAdmin}
 	{@render children()}

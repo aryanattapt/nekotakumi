@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
+	import { canonicalUrl, jsonLd, ogImageUrl, siteName } from "$lib/seo";
 	import { onDestroy } from "svelte";
 
 	let { data } = $props();
@@ -74,7 +75,31 @@
 
 <svelte:head>
 	<title>Tech News - Nekotakumi</title>
-	<meta name="description" content="Tech News Nekotakumi: listing berita teknologi dari berbagai sumber." />
+	<meta name="description" content="Tech News Nekotakumi: berita teknologi terbaru dari berbagai sumber, ringan dibuka dan nyaman dibaca di ponsel." />
+	<meta name="robots" content="noindex, follow" />
+	<link rel="canonical" href={canonicalUrl(page.url, "/tech-news")} />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="Tech News - Nekotakumi" />
+	<meta property="og:description" content="Berita teknologi terbaru dari berbagai sumber, ringan dibuka dan nyaman dibaca di ponsel." />
+	<meta property="og:url" content={canonicalUrl(page.url, "/tech-news")} />
+	<meta property="og:image" content={ogImageUrl(page.url)} />
+	<meta name="twitter:title" content="Tech News - Nekotakumi" />
+	<meta name="twitter:description" content="Berita teknologi terbaru dari berbagai sumber, ringan dibuka dan nyaman dibaca di ponsel." />
+	<meta name="twitter:image" content={ogImageUrl(page.url)} />
+	<script type="application/ld+json">
+		{jsonLd({
+			"@context": "https://schema.org",
+			"@type": "CollectionPage",
+			name: "Tech News - Nekotakumi",
+			url: canonicalUrl(page.url, "/tech-news"),
+			description: "Berita teknologi terbaru dari berbagai sumber, ringan dibuka dan nyaman dibaca di ponsel.",
+			isPartOf: {
+				"@type": "WebSite",
+				name: siteName,
+				url: canonicalUrl(page.url, "/")
+			}
+		})}
+	</script>
 </svelte:head>
 
 <div class="page-shell">
@@ -95,6 +120,12 @@
 				<strong>{data.totalPages || 0}</strong>
 			</div>
 		</div>
+	</section>
+
+	<section class="related-links" aria-label="Jelajahi konten terkait">
+		<a href="/">Catatan blog</a>
+		<a href="/ihsg">Data IHSG</a>
+		<a href="/tentang">Tentang Nekotakumi</a>
 	</section>
 
 	<section class="toolbar">
@@ -425,6 +456,21 @@
 		border: 1px solid var(--border);
 		border-radius: 1.1rem;
 		background: rgba(255, 255, 255, 0.76);
+	}
+
+	.related-links {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin: 1rem 0 0.25rem;
+	}
+
+	.related-links a {
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		padding: 0.7rem 0.95rem;
+		background: rgba(255, 255, 255, 0.88);
+		font-weight: 700;
 	}
 
 	.page-numbers {
