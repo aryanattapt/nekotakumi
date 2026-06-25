@@ -87,10 +87,9 @@
 		padding: 2rem;
 		border: 1px solid var(--border);
 		border-radius: calc(var(--radius) * 1.35);
-		background:
-			radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 40%),
-			linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 252, 255, 0.94));
-		box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
+		background: rgba(255, 255, 255, 0.98);
+		box-shadow: 0 8px 22px rgba(15, 23, 42, 0.045);
+		contain: layout paint;
 	}
 
 	.post-header {
@@ -125,6 +124,7 @@
 	.content {
 		font-size: 1.05rem;
 		line-height: 1.8;
+		overflow-wrap: anywhere;
 	}
 
 	.content :global(p) {
@@ -149,6 +149,16 @@
 
 	.content :global(li) {
 		margin-bottom: 0.5rem;
+	}
+
+	.content :global(img) {
+		border-radius: var(--radius);
+		display: block;
+		margin: 1.25rem auto;
+	}
+
+	.content :global(pre) {
+		contain: paint;
 	}
 
 	.back-nav {
