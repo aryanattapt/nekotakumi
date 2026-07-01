@@ -29,6 +29,14 @@ WORKDIR /app
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/instrumentation.cjs ./instrumentation.cjs
+
+# OTel & Sentry config (overridable via compose)
+ENV OTEL_SERVICE_NAME=nekotakumi
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+ENV SENTRY_DSN=http://049fe3e6a0f38953f511f626c4f01ee7@localhost:8000/1
+ENV LOKI_URL=http://localhost:3100
+ENV NODE_OPTIONS="--require ./instrumentation.cjs"
 
 EXPOSE 3000
 

@@ -11,7 +11,11 @@ services:
         EXPENSE_TRACKER_DATABASE_URL: ${EXPENSE_TRACKER_DATABASE_URL}
         EXPENSE_TRACKER_PASSWORD_HASH: ${EXPENSE_TRACKER_PASSWORD_HASH}
         EXPENSE_TRACKER_TOKEN_SALT: ${EXPENSE_TRACKER_TOKEN_SALT}
-    network_mode: host
+    networks:
+      - apt-stg-internal
+      - apt-stg-public
+    ports:
+      - '40005:40005'
     environment:
       - PORT=40005
       - DATABASE_URL=${DATABASE_URL}
@@ -19,6 +23,10 @@ services:
       - EXPENSE_TRACKER_PASSWORD_HASH=${EXPENSE_TRACKER_PASSWORD_HASH}
       - EXPENSE_TRACKER_TOKEN_SALT=${EXPENSE_TRACKER_TOKEN_SALT}
       - PUBLIC_SITE_URL=${PUBLIC_SITE_URL}
+      - OTEL_SERVICE_NAME=nekotakumi
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://apt-stg-otel-collector:4318
+      - SENTRY_DSN=http://049fe3e6a0f38953f511f626c4f01ee7@apt-stg-glitchtip-web:8000/1
+      - LOKI_URL=http://apt-stg-loki:3100
     restart: always
     deploy:
       resources:
@@ -28,3 +36,9 @@ services:
         reservations:
           cpus: '0.1'
           memory: 32M
+
+networks:
+  apt-stg-internal:
+    external: true
+  apt-stg-public:
+    external: true
