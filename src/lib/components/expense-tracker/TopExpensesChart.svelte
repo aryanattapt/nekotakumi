@@ -5,19 +5,19 @@
 		expenses?: { deskripsi: string | null; jumlah: number; sumber: string }[];
 	} = $props();
 
-	const fmtRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+	const fmtRp = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 
 	let maxVal = $derived(Math.max(...expenses.map(e => e.jumlah), 0));
 </script>
 
 <div class="chart-container">
-	<h3>🏆 Pengeluaran Terbesar</h3>
+	<h3>Top expenses</h3>
 	{#if expenses.length > 0}
 		<div class="bars">
 			{#each expenses as expense, i}
 				<div class="bar-row">
 					<div class="label">
-						<span class="desc">{(expense.deskripsi || '(no desc)').slice(0, 30)}</span>
+						<span class="desc">{(expense.deskripsi || 'No description').slice(0, 30)}</span>
 						<span class="amount">{fmtRp(expense.jumlah)}</span>
 					</div>
 					<div class="track">
@@ -27,7 +27,7 @@
 			{/each}
 		</div>
 	{:else}
-		<div class="empty">Belum ada data</div>
+		<div class="empty">No data available</div>
 	{/if}
 </div>
 
@@ -75,6 +75,7 @@
 	.fill {
 		height: 100%;
 		border-radius: inherit;
+		transition: width 700ms cubic-bezier(0.2, 0.75, 0.25, 1);
 	}
 	.empty {
 		text-align: center;

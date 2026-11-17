@@ -9,10 +9,10 @@
 	let showModal = (false);
 	let editing = (null);
 	let formKtg = (null);
-	let formJumlah = (0);
-	let formPeriode = ('bulanan');
-	let formBulan = (new Date().getMonth() + 1);
-	let formTahun = (new Date().getFullYear());
+	let formAmount = (0);
+	let formPeriod = ('bulanan');
+	let formMonth = (new Date().getMonth() + 1);
+	let formYear = (new Date().getFullYear());
 
 	function getToken() {
 		if (browser) return localStorage.getItem('expense_token');
@@ -32,7 +32,7 @@
 				const data = await res.json();
 				budgets = data.budgets;
 			} else {
-				error = 'Gagal memuat data';
+				error = 'Could not load data';
 			}
 		} catch (e) {
 			error = String(e);
@@ -58,20 +58,20 @@
 	function openAdd() {
 		editing = null;
 		formKtg = null;
-		formJumlah = 0;
-		formPeriode = 'bulanan';
-		formBulan = new Date().getMonth() + 1;
-		formTahun = new Date().getFullYear();
+		formAmount = 0;
+		formPeriod = 'bulanan';
+		formMonth = new Date().getMonth() + 1;
+		formYear = new Date().getFullYear();
 		showModal = true;
 	}
 
 	function openEdit(b) {
 		editing = b;
 		formKtg = b.kategori_id;
-		formJumlah = b.jumlah;
-		formPeriode = b.periode;
-		formBulan = b.bulan;
-		formTahun = b.tahun;
+		formAmount = b.jumlah;
+		formPeriod = b.periode;
+		formMonth = b.bulan;
+		formYear = b.tahun;
 		showModal = true;
 	}
 
@@ -88,6 +88,14 @@
 		if (event.key === 'Escape') closeModal();
 	}
 
+	function typeLabel(type: string | null) {
+		return type === 'pemasukan' ? 'Income' : type === 'pengeluaran' ? 'Expense' : type || '';
+	}
+
+	function periodLabel(period: string) {
+		return period === 'bulanan' ? 'Monthly' : period === 'mingguan' ? 'Weekly' : period;
+	}
+
 	async function handleSave() {
 		const token = getToken();
 		if (!token) return;
@@ -95,8 +103,8 @@
 		try {
 			const method = editing ? 'PUT' : 'POST';
 			const body = editing
-				? { id: editing.id, kategori_id: formKtg, jumlah: formJumlah, periode: formPeriode, bulan: formBulan, tahun: formTahun }
-				: { kategori_id: formKtg, jumlah: formJumlah, periode: formPeriode, bulan: formBulan, tahun: formTahun };
+				? { id: editing.id, kategori_id: formKtg, jumlah: formAmount, periode: formPeriod, bulan: formMonth, tahun: formYear }
+				: { kategori_id: formKtg, jumlah: formAmount, periode: formPeriod, bulan: formMonth, tahun: formYear };
 			const res = await fetch('/api/expense-tracker/budgets', {
 				method,
 				headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -107,7 +115,7 @@
 				await fetchBudgets();
 			} else {
 				const d = await res.json();
-				error = d.error || 'Gagal simpan';
+				error = d.error || 'Could not save changes';
 			}
 		} catch (e) {
 			error = String(e);
@@ -117,7 +125,7 @@
 	}
 
 	async function handleDelete(id) {
-		if (!confirm('Yakin hapus budget ini?')) return;
+		if (!confirm('Delete this budget?')) return;
 		const token = getToken();
 		if (!token) return;
 		loading = true;
@@ -131,7 +139,7 @@
 				await fetchBudgets();
 			} else {
 				const d = await res.json();
-				error = d.error || 'Gagal hapus';
+				error = d.error || 'Could not delete the item';
 			}
 		} catch (e) {
 			error = String(e);
@@ -144,41 +152,45 @@
 </script>
 
 <div class="budget-page">
-	<h2>Budget & Perencanaan</h2>
+	<header class="page-heading">
+		<p class="eyebrow">Expense tracker</p>
+		<h2>Budgets</h2>
+		<p>Set a spending limit for each category and review it by period.</p>
+	</header>
 
 	<div class="toolbar">
-		<button class="btn" onclick={openAdd}>+ Tambah Budget</button>
+		<button class="btn" onclick={openAdd}>+ Add budget</button>
 		<span class="error">{error}</span>
 	</div>
 
 	{#if loading && !budgets.length}
-		<div class="loading">Memuat data...</div>
+		<div class="loading">Loading data...</div>
 	{:else if budgets.length === 0}
-		<div class="empty">Belum ada budget. Klik + Tambah Budget untuk membuat.</div>
+		<div class="empty">No budgets yet. Add one to get started.</div>
 	{:else}
 		<div class="table-container">
 			<table>
 				<thead>
 					<tr>
-						<th>Kategori</th>
-						<th>Tipe</th>
-						<th>Jumlah</th>
-						<th>Periode</th>
-						<th>Bulan/Tahun</th>
-						<th>Aksi</th>
+						<th>Category</th>
+						<th>Type</th>
+						<th>Amount</th>
+						<th>Period</th>
+						<th>Month / year</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each budgets as b}
 						<tr>
-							<td>{b.kategori_nama || 'Tanpa kategori'} {b.kategori_icon || ''}</td>
-							<td><span class:tipe-hijau={b.kategori_tipe === 'pemasukan'}>{b.kategori_tipe || ''}</span></td>
-							<td>Rp {Number(b.jumlah).toLocaleString('id-ID')}</td>
-							<td>{b.periode}</td>
+							<td>{b.kategori_nama || 'Uncategorized'} {b.kategori_icon || ''}</td>
+							<td><span class:tipe-hijau={b.kategori_tipe === 'pemasukan'}>{typeLabel(b.kategori_tipe)}</span></td>
+							<td>IDR {Number(b.jumlah).toLocaleString('en-US')}</td>
+							<td>{periodLabel(b.periode)}</td>
 							<td>{b.bulan}/{b.tahun}</td>
 							<td class="actions">
 								<button class="btn-mini" onclick={() => openEdit(b)}>Edit</button>
-								<button class="btn-mini delete" onclick={() => handleDelete(b.id)}>Hapus</button>
+								<button class="btn-mini delete" onclick={() => handleDelete(b.id)}>Delete</button>
 							</td>
 						</tr>
 					{/each}
@@ -191,40 +203,40 @@
 {#if showModal}
 	<div class="modal-overlay" role="presentation" tabindex="-1" onclick={handleBackdropClick} onkeydown={handleBackdropKeydown}>
 		<div class="modal">
-			<h3>{editing ? 'Edit Budget' : '+ Tambah Budget'}</h3>
+			<h3>{editing ? 'Edit budget' : '+ Add budget'}</h3>
 			<div class="form-group">
-				<label for=ktg>Kategori</label>
+				<label for=ktg>Category</label>
 				<select id=ktg bind:value={formKtg}>
-					<option value={null} disabled>-- Pilih Kategori --</option>
+					<option value={null} disabled>-- Choose a category --</option>
 					{#each categories as c}
-						<option value={c.id}>{c.icon || ''} {c.nama} ({c.tipe})</option>
+						<option value={c.id}>{c.icon || ''} {c.nama} ({typeLabel(c.tipe)})</option>
 					{/each}
 				</select>
 			</div>
 			<div class="form-group">
-				<label for=jumlah>Jumlah (Rp)</label>
-				<input id=jumlah type=number bind:value={formJumlah} placeholder=1000000 />
+				<label for=jumlah>Amount (IDR)</label>
+				<input id=jumlah type=number bind:value={formAmount} placeholder=1000000 />
 			</div>
 			<div class="form-group">
-				<label for=periode>Periode</label>
-				<select id=periode bind:value={formPeriode}>
-					<option value=bulanan>Bulanan</option>
-					<option value=mingguan>Mingguan</option>
+				<label for=periode>Period</label>
+				<select id=periode bind:value={formPeriod}>
+					<option value=bulanan>Monthly</option>
+					<option value=mingguan>Weekly</option>
 				</select>
 			</div>
 			<div class="form-row">
 				<div class="form-group">
-					<label for=bulan>Bulan</label>
-					<input id=bulan type=number min={1} max={12} bind:value={formBulan} />
+					<label for=bulan>Month</label>
+					<input id=bulan type=number min={1} max={12} bind:value={formMonth} />
 				</div>
 				<div class="form-group">
-					<label for=tahun>Tahun</label>
-					<input id=tahun type=number bind:value={formTahun} />
+					<label for=tahun>Year</label>
+					<input id=tahun type=number bind:value={formYear} />
 				</div>
 			</div>
 			<div class="modal-actions">
-				<button class="btn secondary" onclick={closeModal}>Batal</button>
-				<button class="btn" onclick={handleSave} disabled={loading}>Simpan</button>
+				<button class="btn secondary" onclick={closeModal}>Cancel</button>
+				<button class="btn" onclick={handleSave} disabled={loading}>Save</button>
 			</div>
 		</div>
 	</div>
@@ -232,7 +244,10 @@
 
 <style>
 	.budget-page { }
-	h2 { margin-bottom: 1rem; }
+	.page-heading { margin-bottom: 1rem; }
+	h2 { margin-bottom: 0.35rem; font-size: clamp(1.6rem, 3vw, 2rem); }
+	.page-heading p:last-child { color: var(--text-muted); }
+	.eyebrow { color: var(--accent); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
 	.toolbar {
 		display: flex;
 		align-items: center;

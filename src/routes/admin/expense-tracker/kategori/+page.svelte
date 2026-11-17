@@ -8,7 +8,7 @@
 	let showModal = $state(false);
 	let editing = $state(null);
 	let formNama = $state('');
-	let formTipe = $state('pengeluaran');
+	let formType = $state('pengeluaran');
 	let formIcon = $state('');
 
 	function getToken() {
@@ -29,7 +29,7 @@
 				const data = await res.json();
 				categories = data.categories;
 			} else {
-				error = 'Gagal memuat data';
+				error = 'Could not load data';
 			}
 		} catch (e) {
 			error = String(e);
@@ -41,7 +41,7 @@
 	function openAdd() {
 		editing = null;
 		formNama = '';
-		formTipe = 'pengeluaran';
+		formType = 'pengeluaran';
 		formIcon = '';
 		showModal = true;
 	}
@@ -49,7 +49,7 @@
 	function openEdit(c) {
 		editing = c;
 		formNama = c.nama;
-		formTipe = c.tipe;
+		formType = c.tipe;
 		formIcon = c.icon || '';
 		showModal = true;
 	}
@@ -57,6 +57,10 @@
 	function closeModal() {
 		showModal = false;
 		editing = null;
+	}
+
+	function typeLabel(type: string) {
+		return type === 'pemasukan' ? 'Income' : type === 'pengeluaran' ? 'Expense' : type;
 	}
 
 	function handleBackdropClick(event: MouseEvent) {
@@ -74,8 +78,8 @@
 		try {
 			const method = editing ? 'PUT' : 'POST';
 			const body = editing
-				? { id: editing.id, nama: formNama, tipe: formTipe, icon: formIcon }
-				: { nama: formNama, tipe: formTipe, icon: formIcon };
+				? { id: editing.id, nama: formNama, tipe: formType, icon: formIcon }
+				: { nama: formNama, tipe: formType, icon: formIcon };
 			const res = await fetch('/api/expense-tracker/categories', {
 				method,
 				headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -86,7 +90,7 @@
 				await fetchCategories();
 			} else {
 				const d = await res.json();
-				error = d.error || 'Gagal simpan';
+				error = d.error || 'Could not save changes';
 			}
 		} catch (e) {
 			error = String(e);
@@ -96,7 +100,7 @@
 	}
 
 	async function handleDelete(id) {
-		if (!confirm('Yakin hapus kategori ini?')) return;
+		if (!confirm('Delete this category?')) return;
 		const token = getToken();
 		if (!token) return;
 		loading = true;
@@ -110,7 +114,7 @@
 				await fetchCategories();
 			} else {
 				const d = await res.json();
-				error = d.error || 'Gagal hapus';
+				error = d.error || 'Could not delete the item';
 			}
 		} catch (e) {
 			error = String(e);
@@ -123,26 +127,30 @@
 </script>
 
 <div class="kategori-page">
-	<h2>Kategori Pengeluaran & Pemasukan</h2>
+	<header class="page-heading">
+		<p class="eyebrow">Expense tracker</p>
+		<h2>Categories</h2>
+		<p>Organize the income and expenses that appear in your tracker.</p>
+	</header>
 
 	<div class="toolbar">
-		<button class="btn" onclick={openAdd}>+ Tambah Kategori</button>
+		<button class="btn" onclick={openAdd}>+ Add category</button>
 		<span class="error">{error}</span>
 	</div>
 
 	{#if loading && !categories.length}
-		<div class="loading">Memuat data...</div>
+		<div class="loading">Loading data...</div>
 	{:else if categories.length === 0}
-		<div class="empty">Belum ada kategori. Klik + Tambah Kategori untuk membuat.</div>
+		<div class="empty">No categories yet. Add one to get started.</div>
 	{:else}
 		<div class="table-container">
 			<table>
 				<thead>
 					<tr>
 						<th>Icon</th>
-						<th>Nama</th>
-						<th>Tipe</th>
-						<th>Aksi</th>
+						<th>Name</th>
+						<th>Type</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -150,10 +158,10 @@
 						<tr>
 							<td>{c.icon || ''}</td>
 							<td>{c.nama}</td>
-							<td><span class:tipe-hijau={c.tipe === 'pemasukan'}>{c.tipe}</span></td>
+							<td><span class:tipe-hijau={c.tipe === 'pemasukan'}>{typeLabel(c.tipe)}</span></td>
 							<td class="actions">
 								<button class="btn-mini" onclick={() => openEdit(c)}>Edit</button>
-								<button class="btn-mini delete" onclick={() => handleDelete(c.id)}>Hapus</button>
+								<button class="btn-mini delete" onclick={() => handleDelete(c.id)}>Delete</button>
 							</td>
 						</tr>
 					{/each}
@@ -166,25 +174,25 @@
 {#if showModal}
 	<div class="modal-overlay" role="presentation" tabindex="-1" onclick={handleBackdropClick} onkeydown={handleBackdropKeydown}>
 		<div class="modal">
-			<h3>{editing ? 'Edit Kategori' : '+ Tambah Kategori'}</h3>
+			<h3>{editing ? 'Edit category' : 'Add category'}</h3>
 			<div class="form-group">
-				<label for="nama">Nama Kategori</label>
-				<input id="nama" type="text" bind:value={formNama} placeholder="Contoh Kategori" />
+				<label for="nama">Category name</label>
+				<input id="nama" type="text" bind:value={formNama} placeholder="e.g. Food" />
 			</div>
 			<div class="form-group">
-				<label for="tipe">Tipe</label>
-				<select id="tipe" bind:value={formTipe}>
-					<option value="pengeluaran">Pengeluaran</option>
-					<option value="pemasukan">Pemasukan</option>
+				<label for="tipe">Type</label>
+				<select id="tipe" bind:value={formType}>
+					<option value="pengeluaran">Expense</option>
+					<option value="pemasukan">Income</option>
 				</select>
 			</div>
 			<div class="form-group">
 				<label for="icon">Icon (emoji/text)</label>
-				<input id="icon" type="text" bind:value={formIcon} placeholder="Contoh: 💰 🏠 🚗" />
+				<input id="icon" type="text" bind:value={formIcon} placeholder="e.g. 💰 🏠 🚗" />
 			</div>
 			<div class="modal-actions">
-				<button class="btn secondary" onclick={closeModal}>Batal</button>
-				<button class="btn" onclick={handleSave} disabled={loading}>Simpan</button>
+				<button class="btn secondary" onclick={closeModal}>Cancel</button>
+				<button class="btn" onclick={handleSave} disabled={loading}>Save</button>
 			</div>
 		</div>
 	</div>
@@ -192,7 +200,10 @@
 
 <style>
 	.kategori-page { }
-	h2 { margin-bottom: 1rem; }
+	.page-heading { margin-bottom: 1rem; }
+	h2 { margin-bottom: 0.35rem; font-size: clamp(1.6rem, 3vw, 2rem); }
+	.page-heading p:last-child { color: var(--text-muted); }
+	.eyebrow { color: var(--accent); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
 	.toolbar {
 		display: flex;
 		align-items: center;

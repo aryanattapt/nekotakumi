@@ -58,16 +58,16 @@
 						<span class="label">Dashboard</span>
 					</a>
 					<a href="/admin/expense-tracker/transaksi" class:active={isActive("/admin/expense-tracker/transaksi")}>
-						<span class="label">Transaksi</span>
+						<span class="label">Transactions</span>
 					</a>
 					<a href="/admin/expense-tracker/kategori" class:active={isActive("/admin/expense-tracker/kategori")}>
-						<span class="label">Kategori</span>
+						<span class="label">Categories</span>
 					</a>
 					<a href="/admin/expense-tracker/budget" class:active={isActive("/admin/expense-tracker/budget")}>
 						<span class="label">Budget</span>
 					</a>
 					<a href="/admin/expense-tracker/laporan" class:active={isActive("/admin/expense-tracker/laporan")}>
-						<span class="label">Laporan</span>
+						<span class="label">Reports</span>
 					</a>
 				</div>
 			{/if}
@@ -75,7 +75,7 @@
 
 		<div class="group separated">
 			<a href="/admin/expense-tracker/pengaturan" class:active={isActive("/admin/expense-tracker/pengaturan")}>
-				<span class="label">Pengaturan</span>
+				<span class="label">Settings</span>
 			</a>
 
 			<button type="button" class="logout" onclick={handleLogout}>

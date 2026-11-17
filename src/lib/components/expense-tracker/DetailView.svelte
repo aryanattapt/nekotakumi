@@ -1,5 +1,5 @@
 <script lang="ts">
-	interface Transaksi {
+	interface Transactions {
 		id: number;
 		tanggal: string;
 		sumber: string;
@@ -16,7 +16,7 @@
 		limit = 50,
 		onPageChange
 	}: {
-		transactions?: Transaksi[];
+		transactions?: Transactions[];
 		total?: number;
 		page?: number;
 		limit?: number;
@@ -24,12 +24,12 @@
 	} = $props();
 
 	function fmtRp(val: number): string {
-		return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 	}
 
 	// Group by sumber
-	let sortedGroups: [string, { rows: Transaksi[]; subtotal: number }][] = $derived.by(() => {
-		const groups = new Map<string, { rows: Transaksi[]; subtotal: number }>();
+	let sortedGroups: [string, { rows: Transactions[]; subtotal: number }][] = $derived.by(() => {
+		const groups = new Map<string, { rows: Transactions[]; subtotal: number }>();
 		for (const t of transactions) {
 			if (t.via_jenius) continue;
 			if (!groups.has(t.sumber)) {
@@ -42,7 +42,7 @@
 		return Array.from(groups.entries()).sort((a, b) => b[1].subtotal - a[1].subtotal);
 	});
 
-	let viaJeniusRows: Transaksi[] = $derived(transactions.filter(t => t.via_jenius));
+	let viaJeniusRows: Transactions[] = $derived(transactions.filter(t => t.via_jenius));
 
 	const totalPages = $derived(Math.ceil(total / limit));
 	const grandTotal = $derived(sortedGroups.reduce((sum, [, g]) => sum + g.subtotal, 0));
@@ -50,7 +50,7 @@
 
 <div class="detail-view">
 	{#if transactions.length === 0}
-		<div class="empty">Tidak ada transaksi di periode ini</div>
+		<div class="empty">No transactions in this period</div>
 	{:else}
 		{#each sortedGroups as [sumber, group]}
 			<div class="group">
@@ -74,7 +74,7 @@
 		{#if viaJeniusRows.length > 0}
 			<div class="group via-jenius">
 				<div class="group-header dimmed">
-					<span class="group-name">─── Info Tambahan (via Jenius) ───</span>
+					<span class="group-name">─── Additional information (via Jenius) ───</span>
 				</div>
 				<div class="group-rows">
 					{#each viaJeniusRows as txn}
@@ -97,7 +97,7 @@
 		{#if totalPages > 1}
 			<div class="pagination">
 				<button disabled={page <= 1} onclick={() => onPageChange?.(page - 1)}>← Prev</button>
-				<span>Halaman {page} dari {totalPages}</span>
+				<span>Page {page} of {totalPages}</span>
 				<button disabled={page >= totalPages} onclick={() => onPageChange?.(page + 1)}>Next →</button>
 			</div>
 		{/if}

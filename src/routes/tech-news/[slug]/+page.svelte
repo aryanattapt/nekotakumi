@@ -8,24 +8,24 @@
 	const articleUrl = $derived(canonicalUrl(page.url, `/tech-news/${data.item.slug}`));
 	const canonicalHref = $derived(data.item.sourceUrl || articleUrl);
 	const imageUrl = $derived(ogImageUrl(page.url, data.item.imageUrl));
-	const shareText = $derived(`${data.item.title} - Nekotakumi`);
+	const shareText = $derived(`${data.item.title} — Nekotakumi Labs`);
 	const encodedArticleUrl = $derived(encodeURIComponent(articleUrl));
 	const encodedShareText = $derived(encodeURIComponent(shareText));
 </script>
 
 <svelte:head>
-	<title>{data.item.title} - Tech News Nekotakumi</title>
+	<title>{data.item.title} — Tech News · Nekotakumi Labs</title>
 	<meta name="description" content={description} />
 	<meta name="robots" content="noindex, follow" />
 	<link rel="canonical" href={canonicalHref} />
 	<meta property="og:type" content="article" />
-	<meta property="og:title" content={`${data.item.title} - Tech News Nekotakumi`} />
+	<meta property="og:title" content={`${data.item.title} — Tech News · Nekotakumi Labs`} />
 	<meta property="og:description" content={description} />
 	<meta property="og:url" content={articleUrl} />
 	<meta property="og:image" content={imageUrl} />
 	<meta name="twitter:image" content={imageUrl} />
 	<meta property="article:published_time" content={new Date(data.item.publishedAt).toISOString()} />
-	<meta name="twitter:title" content={`${data.item.title} - Tech News Nekotakumi`} />
+	<meta name="twitter:title" content={`${data.item.title} — Tech News · Nekotakumi Labs`} />
 	<meta name="twitter:description" content={description} />
 	<script type="application/ld+json">
 		{jsonLd({
@@ -52,14 +52,14 @@
 <div class="page-shell">
 	<article class="card">
 		<div class="meta">
-			<a href="/tech-news" class="back">&larr; Kembali</a>
+			<a href="/tech-news" class="back">&larr; Back to Tech News</a>
 			{#if data.item.sourceName}
 				<span class="source">{data.item.sourceName}</span>
 			{/if}
 		</div>
 
 		<h1>{data.item.title}</h1>
-		<time>{new Date(data.item.publishedAt).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}</time>
+		<time>{new Date(data.item.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</time>
 
 		{#if data.item.content}
 			<div class="content">{@html data.item.content}</div>
@@ -67,20 +67,20 @@
 
 		{#if data.item.sourceUrl}
 			<div class="source-link">
-				<a href={data.item.sourceUrl} target="_blank" rel="noopener">Baca di sumber asli &rarr;</a>
+				<a href={data.item.sourceUrl} target="_blank" rel="noopener">Read original source &rarr;</a>
 			</div>
 		{/if}
 
-		<nav class="related-links" aria-label="Konten terkait">
-			<a href="/tech-news">Tech news lain</a>
-			<a href="/">Catatan blog</a>
-			<a href="/ihsg">Data IHSG</a>
+		<nav class="related-links" aria-label="Related pages">
+			<a href="/tech-news">More Tech News</a>
+			<a href="/blog">The blog</a>
+			<a href="/ihsg">IHSG data</a>
 		</nav>
 
-		<nav class="share-links" aria-label="Bagikan berita">
-			<a href={`https://twitter.com/intent/tweet?url=${encodedArticleUrl}&text=${encodedShareText}`} target="_blank" rel="noopener noreferrer">Bagikan ke X</a>
-			<a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedArticleUrl}`} target="_blank" rel="noopener noreferrer">Bagikan ke LinkedIn</a>
-			<a href={`https://api.whatsapp.com/send?text=${encodedShareText}%20${encodedArticleUrl}`} target="_blank" rel="noopener noreferrer">Bagikan ke WhatsApp</a>
+		<nav class="share-links" aria-label="Share this story">
+			<a href={`https://twitter.com/intent/tweet?url=${encodedArticleUrl}&text=${encodedShareText}`} target="_blank" rel="noopener noreferrer">Share on X</a>
+			<a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedArticleUrl}`} target="_blank" rel="noopener noreferrer">Share on LinkedIn</a>
+			<a href={`https://api.whatsapp.com/send?text=${encodedShareText}%20${encodedArticleUrl}`} target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
 		</nav>
 	</article>
 </div>

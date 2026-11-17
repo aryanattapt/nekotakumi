@@ -13,18 +13,18 @@
 	let selYear = $state(new Date().getFullYear());
 
 	const months = [
-		{ value: 1, label: 'Januari' },
-		{ value: 2, label: 'Februari' },
-		{ value: 3, label: 'Maret' },
+		{ value: 1, label: 'January' },
+		{ value: 2, label: 'February' },
+		{ value: 3, label: 'March' },
 		{ value: 4, label: 'April' },
-		{ value: 5, label: 'Mei' },
-		{ value: 6, label: 'Juni' },
-		{ value: 7, label: 'Juli' },
-		{ value: 8, label: 'Agustus' },
+		{ value: 5, label: 'May' },
+		{ value: 6, label: 'June' },
+		{ value: 7, label: 'July' },
+		{ value: 8, label: 'August' },
 		{ value: 9, label: 'September' },
-		{ value: 10, label: 'Oktober' },
+		{ value: 10, label: 'October' },
 		{ value: 11, label: 'November' },
-		{ value: 12, label: 'Desember' },
+		{ value: 12, label: 'December' },
 	];
 
 	$effect(() => {
@@ -39,7 +39,7 @@
 
 <div class="filter-bar">
 	<div class="filter-group">
-		<label for="month">Bulan</label>
+		<label for="month">Month</label>
 		<select id="month" bind:value={selMonth}>
 			{#each months as m}
 				<option value={m.value}>{m.label}</option>
@@ -47,10 +47,10 @@
 		</select>
 	</div>
 	<div class="filter-group">
-		<label for="year">Tahun</label>
+		<label for="year">Year</label>
 		<input type="number" id="year" bind:value={selYear} min="2000" max="2100" />
 	</div>
-	<button class="btn" onclick={apply}>🔍 Terapkan</button>
+	<button class="btn" onclick={apply}>🔍 Apply</button>
 </div>
 
 <style>

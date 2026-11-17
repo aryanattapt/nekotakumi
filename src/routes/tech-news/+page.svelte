@@ -74,25 +74,25 @@
 </script>
 
 <svelte:head>
-	<title>Tech News - Nekotakumi</title>
-	<meta name="description" content="Tech News Nekotakumi: berita teknologi terbaru dari berbagai sumber, ringan dibuka dan nyaman dibaca di ponsel." />
+	<title>Tech News — Nekotakumi Labs</title>
+	<meta name="description" content="A readable feed of technology news from across the web, curated for curious minds." />
 	<meta name="robots" content="noindex, follow" />
 	<link rel="canonical" href={canonicalUrl(page.url, "/tech-news")} />
 	<meta property="og:type" content="website" />
-	<meta property="og:title" content="Tech News - Nekotakumi" />
-	<meta property="og:description" content="Berita teknologi terbaru dari berbagai sumber, ringan dibuka dan nyaman dibaca di ponsel." />
+	<meta property="og:title" content="Tech News — Nekotakumi Labs" />
+	<meta property="og:description" content="A readable feed of technology news from across the web, curated for curious minds." />
 	<meta property="og:url" content={canonicalUrl(page.url, "/tech-news")} />
 	<meta property="og:image" content={ogImageUrl(page.url)} />
-	<meta name="twitter:title" content="Tech News - Nekotakumi" />
-	<meta name="twitter:description" content="Berita teknologi terbaru dari berbagai sumber, ringan dibuka dan nyaman dibaca di ponsel." />
+	<meta name="twitter:title" content="Tech News — Nekotakumi Labs" />
+	<meta name="twitter:description" content="A readable feed of technology news from across the web, curated for curious minds." />
 	<meta name="twitter:image" content={ogImageUrl(page.url)} />
 	<script type="application/ld+json">
 		{jsonLd({
 			"@context": "https://schema.org",
 			"@type": "CollectionPage",
-			name: "Tech News - Nekotakumi",
+			name: "Tech News — Nekotakumi Labs",
 			url: canonicalUrl(page.url, "/tech-news"),
-			description: "Berita teknologi terbaru dari berbagai sumber, ringan dibuka dan nyaman dibaca di ponsel.",
+			description: "A readable feed of technology news from across the web, curated for curious minds.",
 			isPartOf: {
 				"@type": "WebSite",
 				name: siteName,
@@ -106,34 +106,34 @@
 	<section class="hero">
 		<div class="hero-copy">
 			<p class="eyebrow">Tech news</p>
-			<h1>Teknologi yang bergerak cepat</h1>
-			<p class="subtitle">Berita teknologi terbaru dari berbagai sumber, kini lebih ringan dibuka dan lebih nyaman dibaca di ponsel.</p>
+			<h1>Technology, lately.</h1>
+			<p class="subtitle">Stories and ideas shaping the way we build, use, and think about technology.</p>
 		</div>
 
 		<div class="hero-stats">
 			<div class="stat">
-				<span class="stat-label">Berita</span>
+				<span class="stat-label">Stories</span>
 				<strong>{data.total}</strong>
 			</div>
 			<div class="stat">
-				<span class="stat-label">Halaman</span>
+				<span class="stat-label">Pages</span>
 				<strong>{data.totalPages || 0}</strong>
 			</div>
 		</div>
 	</section>
 
-	<section class="related-links" aria-label="Jelajahi konten terkait">
-		<a href="/">Catatan blog</a>
-		<a href="/ihsg">Data IHSG</a>
-		<a href="/tentang">Tentang Nekotakumi</a>
+	<section class="related-links" aria-label="More from Nekotakumi Labs">
+		<a href="/blog">The blog</a>
+		<a href="/astronomy-news">Astronomy news</a>
+		<a href="/ihsg">IHSG</a>
 	</section>
 
 	<section class="toolbar">
 		<label class="search">
-			<span>Cari berita</span>
+			<span>Search stories</span>
 			<input
 				type="search"
-				placeholder="Topik, judul, atau cuplikan..."
+				placeholder="Topic, title, or excerpt..."
 				value={searchInput}
 				oninput={onInput}
 			/>
@@ -141,19 +141,19 @@
 
 		{#if data.q}
 			<button class="ghost-button" type="button" onclick={clearSearch} disabled={loading}>
-				Hapus filter
+				Clear search
 			</button>
 		{/if}
 	</section>
 
 	{#if data.q}
-		<p class="search-info">Menampilkan hasil untuk <strong>{data.q}</strong>. {data.total} berita ditemukan.</p>
+		<p class="search-info">Showing results for <strong>{data.q}</strong>. {data.total} stories found.</p>
 	{/if}
 
 	{#if loading}
-		<div class="state-card">Memuat berita terbaru...</div>
+		<div class="state-card">Loading the latest stories...</div>
 	{:else if data.items.length === 0}
-		<div class="state-card empty">{data.q ? "Tidak ada berita yang cocok." : "Belum ada berita teknologi."}</div>
+		<div class="state-card empty">{data.q ? "No stories match that search." : "No technology stories have been added yet."}</div>
 	{:else}
 		<div class="posts">
 			{#each data.items as item}
@@ -164,14 +164,14 @@
 						{:else}
 							<span class="pill alt">Tech</span>
 						{/if}
-						<time>{new Date(item.publishedAt).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}</time>
+						<time>{new Date(item.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</time>
 					</div>
 					<h2><a href={"/tech-news/" + item.slug}>{item.title}</a></h2>
 					{#if item.excerpt}<p class="excerpt">{item.excerpt}</p>{/if}
 					<div class="actions">
-						<a class="read-more" href={"/tech-news/" + item.slug}>Baca selengkapnya</a>
+						<a class="read-more" href={"/tech-news/" + item.slug}>Read story</a>
 						{#if item.sourceUrl}
-							<a class="source-link" href={item.sourceUrl} target="_blank" rel="noopener">Sumber asli</a>
+							<a class="source-link" href={item.sourceUrl} target="_blank" rel="noopener">Original source</a>
 						{/if}
 					</div>
 				</article>
@@ -179,8 +179,8 @@
 		</div>
 
 		{#if data.totalPages > 1}
-			<nav class="pagination" aria-label="Navigasi halaman tech news">
-				<button type="button" class="page-step" disabled={loading || data.page <= 1} onclick={() => goTo(data.page - 1)}>Sebelumnya</button>
+			<nav class="pagination" aria-label="Technology news pagination">
+				<button type="button" class="page-step" disabled={loading || data.page <= 1} onclick={() => goTo(data.page - 1)}>Previous</button>
 
 				<div class="page-numbers">
 					{#each getPageWindow(data.page, data.totalPages) as currentPage}
@@ -196,7 +196,7 @@
 					{/each}
 				</div>
 
-				<button type="button" class="page-step" disabled={loading || data.page >= data.totalPages} onclick={() => goTo(data.page + 1)}>Selanjutnya</button>
+				<button type="button" class="page-step" disabled={loading || data.page >= data.totalPages} onclick={() => goTo(data.page + 1)}>Next</button>
 			</nav>
 		{/if}
 	{/if}

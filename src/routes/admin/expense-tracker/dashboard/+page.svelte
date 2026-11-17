@@ -58,7 +58,7 @@
 				})
 			]);
 
-			if (!summaryRes.ok) throw new Error('Gagal memuat data');
+			if (!summaryRes.ok) throw new Error('Could not load data');
 			const summaryData = await summaryRes.json();
 
 			if (summaryData.sources) {
@@ -124,7 +124,7 @@
 			}
 
 		} catch (e: any) {
-			error = e.message || 'Gagal memuat data';
+			error = e.message || 'Could not load data';
 		} finally {
 			loading = false;
 		}
@@ -140,10 +140,15 @@
 </script>
 
 <div class="dashboard">
+	<header class="page-heading">
+		<p class="eyebrow">Expense tracker</p>
+		<h2>Monthly overview</h2>
+		<p>A quick read on where this month’s spending is going.</p>
+	</header>
 	<MonthYearFilter {month} {year} onApply={handleApply} />
 
 	{#if loading}
-		<div class="loading">Memuat data...</div>
+		<div class="loading">Loading data...</div>
 	{:else if error}
 		<div class="error">{error}</div>
 	{:else}
@@ -156,6 +161,10 @@
 	.dashboard {
 		/* container */
 	}
+	.page-heading { margin-bottom: 1rem; }
+	.page-heading h2 { margin-bottom: 0.35rem; font-size: clamp(1.6rem, 3vw, 2rem); }
+	.page-heading p:last-child { color: var(--text-muted); }
+	.eyebrow { color: var(--accent); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
 	.loading, .error {
 		text-align: center;
 		padding: 2rem;

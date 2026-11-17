@@ -14,7 +14,7 @@
 	}
 
 	function getFallbackPath(pathname: string) {
-		if (pathname.startsWith("/blog/")) return "/";
+		if (pathname.startsWith("/blog/")) return "/blog";
 		if (pathname.startsWith("/tech-news/")) return "/tech-news";
 		if (pathname.startsWith("/astronomy-news/")) return "/astronomy-news";
 		return "/";
@@ -54,13 +54,13 @@
 {#if showTop || isDetailPage(page.url.pathname)}
 	<div class="floating-actions" aria-label="Quick actions">
 		{#if isDetailPage(page.url.pathname)}
-			<button class="fab secondary" type="button" onclick={goBack} aria-label="Kembali ke halaman sebelumnya">
+			<button class="fab secondary" type="button" onclick={goBack} aria-label="Go back">
 				<span aria-hidden="true">←</span>
 			</button>
 		{/if}
 
 		{#if showTop}
-			<button class="fab primary" type="button" onclick={scrollToTop} aria-label="Kembali ke atas">
+			<button class="fab primary" type="button" onclick={scrollToTop} aria-label="Back to top">
 				<span aria-hidden="true">↑</span>
 			</button>
 		{/if}

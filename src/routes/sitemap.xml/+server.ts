@@ -37,6 +37,7 @@ export async function GET({ url }) {
 
 	const staticRoutes = [
 		urlEntry(baseUrl, "/", null, "1.0"),
+		urlEntry(baseUrl, "/blog", null, "0.9"),
 		urlEntry(baseUrl, "/tentang", null, "0.6")
 	];
 

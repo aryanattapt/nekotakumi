@@ -1,7 +1,7 @@
-export const siteName = "Nekotakumi";
+export const siteName = "Nekotakumi Labs";
 export const defaultDescription =
-	"Blog Nekotakumi berisi catatan teknologi, tutorial, berita teknologi, data IHSG, dan tulisan ringan yang cepat dibaca.";
-export const defaultLocale = "id_ID";
+	"A personal R&D lab for software experiments, side projects, and things worth figuring out.";
+export const defaultLocale = "en_US";
 export const defaultOgImage = "/og-image.png";
 
 export function canonicalUrl(url: URL, pathname = url.pathname) {

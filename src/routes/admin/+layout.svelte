@@ -52,10 +52,10 @@
 				token = data.token;
 				if (browser) localStorage.setItem('expense_token', data.token);
 			} else {
-				error = data.error || 'Login gagal';
+				error = data.error || 'Could not sign in';
 			}
 		} catch (e) {
-			error = 'Gagal terhubung ke server';
+			error = 'Could not connect to the server';
 		} finally {
 			loginLoading = false;
 		}
@@ -69,12 +69,12 @@
 </script>
 
 {#if loading}
-	<div class="loading">Memuat...</div>
+	<div class="loading">Loading...</div>
 {:else if !token}
 	<div class="login-page">
 		<div class="login-card">
 			<h2>🔒 Admin Area</h2>
-			<p class="subtitle">Masukkan password untuk mengakses</p>
+			<p class="subtitle">Enter your password to continue</p>
 			<form onsubmit={handleLogin}>
 				<input
 					type="password"
@@ -86,7 +86,7 @@
 					<div class="error">{error}</div>
 				{/if}
 				<button type="submit" disabled={loginLoading || !password}>
-					{loginLoading ? 'Memproses...' : 'Masuk'}
+					{loginLoading ? 'Signing in...' : 'Sign in'}
 				</button>
 			</form>
 		</div>
@@ -111,7 +111,9 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		min-height: 60vh;
+		min-height: 68vh;
+		padding: 1rem;
+		background: radial-gradient(ellipse at 50% 35%, rgba(196, 181, 253, 0.2), transparent 27rem);
 	}
 	.login-card {
 		background: var(--bg-card, #fff);
@@ -121,6 +123,8 @@
 		width: 100%;
 		max-width: 360px;
 		text-align: center;
+		box-shadow: 0 24px 70px rgba(24, 32, 51, 0.11);
+		animation: rise-in 420ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
 	}
 	h2 {
 		margin-bottom: 0.5rem;
@@ -156,6 +160,8 @@
 	}
 	button:hover:not(:disabled) {
 		background: var(--accent-hover, #6d28d9);
+		transform: translateY(-1px);
+		box-shadow: 0 9px 22px rgba(109, 40, 217, 0.22);
 	}
 	.error {
 		color: #ef4444;

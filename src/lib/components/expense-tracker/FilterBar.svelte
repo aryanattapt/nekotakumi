@@ -24,14 +24,14 @@
 
 <div class="filter-bar">
 	<div class="filter-group">
-		<label for="start">Dari</label>
+		<label for="start">From</label>
 		<input type="date" id="start" bind:value={sDate} />
 	</div>
 	<div class="filter-group">
-		<label for="end">Sampai</label>
+		<label for="end">To</label>
 		<input type="date" id="end" bind:value={eDate} />
 	</div>
-	<button class="btn" onclick={apply}>🔍 Terapkan</button>
+	<button class="btn" onclick={apply}>🔍 Apply</button>
 </div>
 
 <style>

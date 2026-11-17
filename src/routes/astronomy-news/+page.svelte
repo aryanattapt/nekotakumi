@@ -46,25 +46,25 @@
 </script>
 
 <svelte:head>
-	<title>Astronomy News - Nekotakumi</title>
-	<meta name="description" content="Astronomy News Nekotakumi: berita astronomi dan luar angkasa terbaru." />
+	<title>Astronomy News — Nekotakumi Labs</title>
+	<meta name="description" content="Space, astronomy, and the things happening beyond our little corner of the universe." />
 	<meta name="robots" content="noindex, follow" />
 	<link rel="canonical" href={canonicalUrl(page.url, "/astronomy-news")} />
 	<meta property="og:type" content="website" />
-	<meta property="og:title" content="Astronomy News - Nekotakumi" />
-	<meta property="og:description" content="Berita astronomi dan luar angkasa terbaru dari Nekotakumi." />
+	<meta property="og:title" content="Astronomy News — Nekotakumi Labs" />
+	<meta property="og:description" content="Space, astronomy, and the things happening beyond our little corner of the universe." />
 	<meta property="og:url" content={canonicalUrl(page.url, "/astronomy-news")} />
 	<meta property="og:image" content={ogImageUrl(page.url)} />
-	<meta name="twitter:title" content="Astronomy News - Nekotakumi" />
-	<meta name="twitter:description" content="Berita astronomi dan luar angkasa terbaru dari Nekotakumi." />
+	<meta name="twitter:title" content="Astronomy News — Nekotakumi Labs" />
+	<meta name="twitter:description" content="Space, astronomy, and the things happening beyond our little corner of the universe." />
 	<meta name="twitter:image" content={ogImageUrl(page.url)} />
 	<script type="application/ld+json">
 		{jsonLd({
 			"@context": "https://schema.org",
 			"@type": "CollectionPage",
-			name: "Astronomy News - Nekotakumi",
+			name: "Astronomy News — Nekotakumi Labs",
 			url: canonicalUrl(page.url, "/astronomy-news"),
-			description: "Berita astronomi dan luar angkasa terbaru dari Nekotakumi.",
+			description: "Space, astronomy, and the things happening beyond our little corner of the universe.",
 			isPartOf: {
 				"@type": "WebSite",
 				name: siteName,
@@ -78,30 +78,30 @@
 	<section class="hero">
 		<div class="hero-copy">
 			<p class="eyebrow">Space news</p>
-			<h1>Astronomy News</h1>
-			<p class="subtitle">Berita astronomi dan luar angkasa terbaru, disusun lebih bersih dengan pagination yang nyaman di desktop maupun mobile.</p>
+			<h1>A little space news.</h1>
+			<p class="subtitle">Astronomy stories and discoveries from beyond our little corner of the universe.</p>
 		</div>
 
 		<div class="hero-stats">
 			<div class="stat">
-				<span class="stat-label">Berita</span>
+				<span class="stat-label">Stories</span>
 				<strong>{data.total}</strong>
 			</div>
 			<div class="stat">
-				<span class="stat-label">Halaman</span>
+				<span class="stat-label">Pages</span>
 				<strong>{data.totalPages || 0}</strong>
 			</div>
 		</div>
 	</section>
 
-	<section class="related-links" aria-label="Jelajahi konten terkait">
-		<a href="/">Catatan blog</a>
+	<section class="related-links" aria-label="More from Nekotakumi Labs">
+		<a href="/blog">The blog</a>
 		<a href="/tech-news">Tech news</a>
-		<a href="/tentang">Tentang Nekotakumi</a>
+		<a href="/ihsg">IHSG</a>
 	</section>
 
 	{#if loading}
-		<div class="state-card">Memuat berita antariksa...</div>
+		<div class="state-card">Loading space stories...</div>
 	{:else if data.items?.length}
 		<div class="posts">
 			{#each data.items as item}
@@ -112,20 +112,20 @@
 						{:else}
 							<span class="pill alt">Astronomy</span>
 						{/if}
-						<time>{new Date(item.publishedAt).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}</time>
+						<time>{new Date(item.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</time>
 					</div>
 					<h2><a href={"/astronomy-news/" + item.slug}>{item.title}</a></h2>
 					{#if item.excerpt}<p class="excerpt">{item.excerpt}</p>{/if}
 					{#if item.sourceUrl}
-						<a class="read-more" href={item.sourceUrl} target="_blank" rel="noopener">Baca di sumber asli</a>
+						<a class="read-more" href={item.sourceUrl} target="_blank" rel="noopener">Read original source</a>
 					{/if}
 				</article>
 			{/each}
 		</div>
 
 		{#if data.totalPages > 1}
-			<nav class="pagination" aria-label="Navigasi halaman astronomy news">
-				<button type="button" class="page-step" disabled={loading || data.page <= 1} onclick={() => goTo(data.page - 1)}>Sebelumnya</button>
+			<nav class="pagination" aria-label="Astronomy news pagination">
+				<button type="button" class="page-step" disabled={loading || data.page <= 1} onclick={() => goTo(data.page - 1)}>Previous</button>
 
 				<div class="page-numbers">
 					{#each getPageWindow(data.page, data.totalPages) as currentPage}
@@ -141,11 +141,11 @@
 					{/each}
 				</div>
 
-				<button type="button" class="page-step" disabled={loading || data.page >= data.totalPages} onclick={() => goTo(data.page + 1)}>Selanjutnya</button>
+				<button type="button" class="page-step" disabled={loading || data.page >= data.totalPages} onclick={() => goTo(data.page + 1)}>Next</button>
 			</nav>
 		{/if}
 	{:else}
-		<div class="state-card empty">Belum ada berita astronomi.</div>
+		<div class="state-card empty">No astronomy stories have been added yet.</div>
 	{/if}
 </div>
 

@@ -16,9 +16,9 @@ export async function POST({ request }) {
   if (!verifyAuth(request)) return json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { nama, tipe, icon } = await request.json();
-    if (!nama || !tipe) return json({ error: "nama and tipe required" }, { status: 400 });
+    if (!nama || !tipe) return json({ error: "Category name and type are required." }, { status: 400 });
     if (!["pemasukan", "pengeluaran"].includes(tipe))
-      return json({ error: "tipe must be pemasukan or pengeluaran" }, { status: 400 });
+      return json({ error: "Type must be income or expense." }, { status: 400 });
     const [row] = await sql`
       INSERT INTO finansial.kategori (nama, tipe, icon)
       VALUES (${nama}, ${tipe}, ${icon || null})

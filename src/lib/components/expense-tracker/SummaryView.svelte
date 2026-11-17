@@ -14,13 +14,13 @@
 	};
 
 	function fmtRp(val: number): string {
-		return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 	}
 </script>
 
 <div class="summary-view">
 	{#if sources.length === 0}
-		<div class="empty">Tidak ada transaksi di periode ini</div>
+		<div class="empty">No transactions in this period</div>
 	{:else}
 		<div class="cards">
 			{#each sources as source}
@@ -33,7 +33,7 @@
 			{/each}
 		</div>
 		<div class="grand-total">
-			<span class="label">Total Pengeluaran</span>
+			<span class="label">Total Expense</span>
 			<span class="amount">{fmtRp(grandTotal)}</span>
 		</div>
 	{/if}

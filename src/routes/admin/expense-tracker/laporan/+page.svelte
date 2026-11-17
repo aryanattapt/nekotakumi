@@ -9,6 +9,8 @@
 	let endDate = $state('');
 	let monthly = $state<{ bulan: string; total: number }[]>([]);
 	let summary = $state<{ total: number } | null>(null);
+	const formatCurrency = (value: number) =>
+		new Intl.NumberFormat('en-US', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value) || 0);
 
 	function getToken() {
 		if (browser) return localStorage.getItem('expense_token');
@@ -28,7 +30,7 @@
 				monthly = data.monthly || [];
 				summary = data.summary || null;
 			} else {
-				error = 'Gagal memuat laporan';
+				error = 'Could not load the report';
 			}
 		} catch (e) {
 			error = String(e);
@@ -38,7 +40,7 @@
 	}
 
 	function buildFilename(format: 'csv' | 'xlsx' | 'pdf') {
-		return `laporan-pengeluaran-${startDate}_sampai_${endDate}.${format}`;
+		return `expense-report-${startDate}-to-${endDate}.${format}`;
 	}
 
 	async function downloadReport(format: 'csv' | 'xlsx' | 'pdf') {
@@ -51,7 +53,7 @@
 			const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
 			if (!res.ok) {
 				const data = await res.json().catch(() => ({}));
-				throw new Error(data.error || 'Gagal mengunduh laporan');
+				throw new Error(data.error || 'Could not download the report');
 			}
 			const blob = await res.blob();
 			const objectUrl = URL.createObjectURL(blob);
@@ -83,10 +85,10 @@
 </script>
 
 <svelte:head>
-	<title>Laporan Pengeluaran - Nekotakumi</title>
+	<title>Expense reports — Nekotakumi Labs</title>
 	<meta
 		name="description"
-		content="Laporan pengeluaran Expense Tracker Nekotakumi yang mengikuti total di detail transaksi."
+		content="Review monthly expense totals and export transaction reports."
 	/>
 </svelte:head>
 
@@ -94,30 +96,30 @@
 	<section class="hero">
 		<div>
 			<p class="eyebrow">Expense tracker</p>
-			<h2>Laporan Pengeluaran</h2>
-			<p class="lead">Total di halaman ini mengikuti detail transaksi dan tidak menampilkan pemisahan pemasukan.</p>
+			<h2>Expense reports</h2>
+			<p class="lead">Monthly totals are based on transaction details. Income is not included in this report.</p>
 		</div>
 
 		<div class="summary-card">
-			<span class="label">Total Pengeluaran</span>
-			<strong>{summary ? `Rp ${Number(summary.total).toLocaleString('id-ID')}` : 'Rp 0'}</strong>
+			<span class="label">Total Expense</span>
+			<strong>{formatCurrency(summary?.total || 0)}</strong>
 		</div>
 	</section>
 
 	<div class="filter-bar">
 		<div class="filter-group">
-			<label for="start">Dari</label>
+			<label for="start">From</label>
 			<input type="date" id="start" bind:value={startDate} />
 		</div>
 		<div class="filter-group">
-			<label for="end">Sampai</label>
+			<label for="end">To</label>
 			<input type="date" id="end" bind:value={endDate} />
 		</div>
-		<button class="btn" onclick={applyFilter}>Terapkan</button>
+		<button class="btn" onclick={applyFilter}>Apply</button>
 	</div>
 
 	{#if loading}
-		<div class="state-card">Memuat data...</div>
+		<div class="state-card">Loading data...</div>
 	{:else if error}
 		<div class="state-card error">{error}</div>
 	{:else}
@@ -125,20 +127,20 @@
 			<table>
 				<thead>
 					<tr>
-						<th>Bulan</th>
+						<th>Month</th>
 						<th>Total</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#if monthly.length === 0}
 						<tr>
-							<td colspan="2" class="empty-row">Tidak ada data pada periode ini.</td>
+							<td colspan="2" class="empty-row">No data for this period.</td>
 						</tr>
 					{:else}
 						{#each monthly as m}
 							<tr>
 								<td>{m.bulan}</td>
-								<td>Rp {Number(m.total).toLocaleString('id-ID')}</td>
+								<td>{formatCurrency(m.total)}</td>
 							</tr>
 						{/each}
 					{/if}
@@ -148,13 +150,13 @@
 
 		<div class="actions">
 			<button class="btn" onclick={() => downloadReport('csv')} disabled={!!exportingFormat || loading}>
-				{exportingFormat === 'csv' ? 'Mengunduh CSV...' : 'Download CSV'}
+				{exportingFormat === 'csv' ? 'Preparing CSV...' : 'Download CSV'}
 			</button>
 			<button class="btn secondary" onclick={() => downloadReport('xlsx')} disabled={!!exportingFormat || loading}>
-				{exportingFormat === 'xlsx' ? 'Mengunduh XLSX...' : 'Download XLSX'}
+				{exportingFormat === 'xlsx' ? 'Preparing XLSX...' : 'Download XLSX'}
 			</button>
 			<button class="btn secondary" onclick={() => downloadReport('pdf')} disabled={!!exportingFormat || loading}>
-				{exportingFormat === 'pdf' ? 'Mengunduh PDF...' : 'Download PDF'}
+				{exportingFormat === 'pdf' ? 'Preparing PDF...' : 'Download PDF'}
 			</button>
 		</div>
 	{/if}

@@ -20,10 +20,10 @@
 			if (data.ok && data.token) {
 				onLogin(data.token);
 			} else {
-				error = data.error || 'Login gagal';
+				error = data.error || 'Could not sign in';
 			}
 		} catch (e) {
-			error = 'Gagal terhubung ke server';
+			error = 'Could not connect to the server';
 		} finally {
 			loading = false;
 		}
@@ -33,7 +33,7 @@
 <div class="auth-gate">
 	<div class="auth-card">
 		<h2>🔒 Expense Tracker</h2>
-		<p class="subtitle">Masukkan password untuk mengakses</p>
+		<p class="subtitle">Enter your password to continue</p>
 		<form onsubmit={handleSubmit}>
 			<input
 				type="password"
@@ -46,7 +46,7 @@
 				<div class="error">{error}</div>
 			{/if}
 			<button type="submit" disabled={loading || !password}>
-				{loading ? 'Memproses...' : 'Masuk'}
+				{loading ? 'Signing in...' : 'Sign in'}
 			</button>
 		</form>
 	</div>

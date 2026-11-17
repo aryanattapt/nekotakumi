@@ -18,10 +18,10 @@ export interface MonthlyReportData {
 	};
 }
 
-const CURRENCY_FORMAT = '"Rp "#,##0;[Red]-"Rp "#,##0';
+const CURRENCY_FORMAT = '"IDR "#,##0;[Red]-"IDR "#,##0';
 
 function formatCurrency(value: number) {
-	return new Intl.NumberFormat('id-ID', {
+	return new Intl.NumberFormat('en-US', {
 		style: 'currency',
 		currency: 'IDR',
 		maximumFractionDigits: 0
@@ -34,7 +34,7 @@ function escapeCsvValue(value: string | number) {
 }
 
 export function getReportFilename(start: string, end: string, extension: string) {
-	const base = `laporan-keuangan-${start}_sampai_${end}`;
+	const base = `expense-report-${start}-to-${end}`;
 	return extension ? `${base}.${extension}` : base;
 }
 
@@ -81,7 +81,7 @@ export async function getMonthlyReport(start: string, end: string): Promise<Mont
 }
 
 export function buildCsvReport(report: MonthlyReportData) {
-	const header = 'Bulan,Total';
+	const header = 'Month,Total';
 	const rows = report.monthly.map((row) => [escapeCsvValue(row.bulan), escapeCsvValue(row.total)].join(','));
 	return [header, ...rows].join('\n');
 }
@@ -91,7 +91,7 @@ export async function buildXlsxReport(report: MonthlyReportData) {
 	workbook.creator = 'Nekotakumi';
 	workbook.created = new Date();
 
-	const sheet = workbook.addWorksheet('Laporan Keuangan', {
+	const sheet = workbook.addWorksheet('Expense report', {
 		properties: { tabColor: { argb: '7C3AED' } }
 	});
 
@@ -101,18 +101,18 @@ export async function buildXlsxReport(report: MonthlyReportData) {
 	];
 
 	sheet.mergeCells('A1:B1');
-	sheet.getCell('A1').value = 'Laporan Pengeluaran Expense Tracker';
+	sheet.getCell('A1').value = 'Expense Tracker Report';
 	sheet.getCell('A1').font = { bold: true, size: 16 };
 	sheet.getCell('A1').alignment = { horizontal: 'center' };
 
 	sheet.mergeCells('A2:B2');
-	sheet.getCell('A2').value = `Periode: ${report.period.start} sampai ${report.period.end}`;
+	sheet.getCell('A2').value = `Period: ${report.period.start} to ${report.period.end}`;
 	sheet.getCell('A2').alignment = { horizontal: 'center' };
 
 	sheet.addRow([]);
-	sheet.addRow(['Total Pengeluaran', report.summary.total]);
+	sheet.addRow(['Total expenses', report.summary.total]);
 	sheet.addRow([]);
-	sheet.addRow(['Bulan', 'Total']);
+	sheet.addRow(['Month', 'Total']);
 
 	const headerRow = sheet.getRow(6);
 	headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
@@ -172,7 +172,7 @@ export async function buildPdfReport(report: MonthlyReportData) {
 			doc.fontSize(10).fillColor('#ffffff');
 			doc.rect(doc.page.margins.left, y, pageWidth, rowHeight).fill('#7C3AED');
 
-			doc.fillColor('#ffffff').text('Bulan', columnX[0] + 6, y + 6, {
+			doc.fillColor('#ffffff').text('Month', columnX[0] + 6, y + 6, {
 				width: columnWidths[0] - 12
 			});
 			doc.fillColor('#ffffff').text('Total', columnX[1] + 6, y + 6, {
@@ -191,16 +191,16 @@ export async function buildPdfReport(report: MonthlyReportData) {
 			drawTableHeader();
 		};
 
-		doc.fontSize(18).fillColor('#111827').text('Laporan Pengeluaran Expense Tracker', {
+		doc.fontSize(18).fillColor('#111827').text('Expense Tracker Report', {
 			align: 'center'
 		});
 		doc.moveDown(0.3);
-		doc.fontSize(10).fillColor('#4b5563').text(`Periode: ${report.period.start} sampai ${report.period.end}`, {
+		doc.fontSize(10).fillColor('#4b5563').text(`Period: ${report.period.start} to ${report.period.end}`, {
 			align: 'center'
 		});
 		doc.moveDown(1);
 
-		doc.fontSize(11).fillColor('#111827').text(`Total Pengeluaran: ${formatCurrency(report.summary.total)}`);
+		doc.fontSize(11).fillColor('#111827').text(`Total expenses: ${formatCurrency(report.summary.total)}`);
 		doc.moveDown(0.75);
 
 		drawTableHeader();

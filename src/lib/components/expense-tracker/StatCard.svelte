@@ -2,14 +2,14 @@
 	let { title, count, total, color = '#7c3aed' }: { title: string; count: number; total: number; color?: string } = $props();
 
 	function fmtRp(val: number): string {
-		return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 	}
 </script>
 
 <div class="stat-card" style="--card-color: {color}">
 	<div class="card-header">
 		<span class="title">{title}</span>
-		<span class="count">{count} transaksi</span>
+		<span class="count">{count} transactions</span>
 	</div>
 	<div class="amount">{fmtRp(total)}</div>
 </div>

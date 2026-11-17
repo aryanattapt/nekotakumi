@@ -11,7 +11,7 @@
 	<title>{status} - Nekotakumi</title>
 	<meta
 		name="description"
-		content={isNotFound ? 'Halaman tidak ditemukan di Nekotakumi.' : 'Terjadi kesalahan saat memuat halaman Nekotakumi.'}
+		content={isNotFound ? 'This page could not be found at Nekotakumi Labs.' : 'Something went wrong while loading this page.'}
 	/>
 </svelte:head>
 
@@ -21,23 +21,23 @@
 
 	<section class="card">
 		<div class="badge">{status}</div>
-		<h1>{isNotFound ? 'Halaman tidak ditemukan' : 'Terjadi kesalahan'}</h1>
+			<h1>{isNotFound ? 'Page not found' : 'Something went wrong'}</h1>
 		<p class="lead">
 			{#if isNotFound}
-				Maaf, halaman <strong>{currentPath}</strong> tidak tersedia atau sudah dipindahkan.
+				The page <strong>{currentPath}</strong> isn’t here. It may have moved or the link may be old.
 			{:else}
-				Ada kendala saat membuka halaman ini. Coba kembali sebentar lagi atau kembali ke beranda.
+				There was a problem opening this page. Try again in a moment or head back home.
 			{/if}
 		</p>
 
 		<div class="actions">
-			<a href="/" class="primary">Kembali ke beranda</a>
-			<a href="/tech-news" class="secondary">Lihat tech news</a>
+			<a href="/" class="primary">Back home</a>
+			<a href="/blog" class="secondary">Browse the blog</a>
 		</div>
 
 		{#if error?.message}
 			<details class="details">
-				<summary>Detail error</summary>
+				<summary>Error details</summary>
 				<pre>{error.message}</pre>
 			</details>
 		{/if}

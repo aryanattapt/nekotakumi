@@ -71,11 +71,15 @@
 </script>
 
 <div class="transaksi-page">
-	<h2>📋 Detail Transaksi</h2>
+	<header class="page-heading">
+		<p class="eyebrow">Expense tracker</p>
+		<h2>Transaction details</h2>
+		<p>Browse and filter transactions by date.</p>
+	</header>
 	<FilterBar {startDate} {endDate} onApply={handleApply} />
 
 	{#if loading}
-		<div class="loading">Memuat data...</div>
+		<div class="loading">Loading data...</div>
 	{:else}
 		<DetailView
 			{transactions}
@@ -92,8 +96,12 @@
 		/* container */
 	}
 	h2 {
-		margin-bottom: 1rem;
+		margin-bottom: 0.35rem;
+		font-size: clamp(1.6rem, 3vw, 2rem);
 	}
+	.page-heading { margin-bottom: 1rem; }
+	.page-heading p:last-child { color: var(--text-muted); }
+	.eyebrow { color: var(--accent); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
 	.loading {
 		text-align: center;
 		padding: 2rem;

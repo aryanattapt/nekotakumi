@@ -7,11 +7,11 @@
 			href: '/admin/expense-tracker/dashboard',
 			children: [
 				{ href: '/admin/expense-tracker/dashboard', label: '📊 Dashboard' },
-				{ href: '/admin/expense-tracker/transaksi', label: '📋 Transaksi' },
-				{ href: '/admin/expense-tracker/kategori', label: '📂 Kategori', future: true },
-				{ href: '/admin/expense-tracker/budget', label: '💰 Budget', future: true },
-				{ href: '/admin/expense-tracker/laporan', label: '📄 Laporan', future: true },
-				{ href: '/admin/expense-tracker/pengaturan', label: '⚙️ Pengaturan', future: true },
+				{ href: '/admin/expense-tracker/transaksi', label: '📋 Transactions' },
+				{ href: '/admin/expense-tracker/kategori', label: '📂 Categories' },
+				{ href: '/admin/expense-tracker/budget', label: '💰 Budgets' },
+				{ href: '/admin/expense-tracker/laporan', label: '📄 Reports' },
+				{ href: '/admin/expense-tracker/pengaturan', label: '⚙️ Settings' },
 			]
 		}
 	];
@@ -32,12 +32,8 @@
 					<a
 						href={item.href}
 						class:active={isActive(item.href)}
-						class:future={item.future}
 					>
 						<span class="label">{item.label}</span>
-						{#if item.future}
-							<span class="badge">Soon</span>
-						{/if}
 					</a>
 				{/each}
 			</div>
@@ -100,20 +96,5 @@
 		background: var(--accent, #7c3aed);
 		color: #fff;
 		font-weight: 600;
-	}
-	a.future {
-		opacity: 0.6;
-	}
-	.badge {
-		font-size: 0.65rem;
-		background: #e5e7eb;
-		padding: 0.15rem 0.4rem;
-		border-radius: 4px;
-		color: var(--text-muted, #6b7280);
-		margin-left: auto;
-	}
-	a.active .badge {
-		background: rgba(255,255,255,0.2);
-		color: #fff;
 	}
 </style>

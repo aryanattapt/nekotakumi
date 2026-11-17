@@ -21,7 +21,7 @@
 	const formatNumber = (value: number | null | undefined, digits = 0) =>
 		value === null || value === undefined
 			? '-'
-			: new Intl.NumberFormat('id-ID', {
+			: new Intl.NumberFormat('en-US', {
 				minimumFractionDigits: digits,
 				maximumFractionDigits: digits
 			}).format(value);
@@ -44,24 +44,24 @@
 </script>
 
 <svelte:head>
-	<title>IHSG - Nekotakumi</title>
-	<meta name="description" content="Pantau data IHSG, USD/IDR, emas, dan ringkasan sektor pasar Indonesia terbaru di Nekotakumi." />
+	<title>IHSG — Nekotakumi Labs</title>
+	<meta name="description" content="A snapshot of the Indonesian market, including the IHSG, USD/IDR, gold, and sector data." />
 	<meta name="robots" content="noindex, follow" />
 	<link rel="canonical" href={canonicalUrl(page.url, "/ihsg")} />
 	<meta property="og:type" content="website" />
-	<meta property="og:title" content="IHSG - Nekotakumi" />
-	<meta property="og:description" content="Pantau data IHSG, USD/IDR, emas, dan ringkasan sektor pasar Indonesia terbaru di Nekotakumi." />
+	<meta property="og:title" content="IHSG — Nekotakumi Labs" />
+	<meta property="og:description" content="A snapshot of the Indonesian market, including the IHSG, USD/IDR, gold, and sector data." />
 	<meta property="og:url" content={canonicalUrl(page.url, "/ihsg")} />
 	<meta property="og:image" content={ogImageUrl(page.url)} />
-	<meta name="twitter:title" content="IHSG - Nekotakumi" />
-	<meta name="twitter:description" content="Pantau data IHSG, USD/IDR, emas, dan ringkasan sektor pasar Indonesia terbaru di Nekotakumi." />
+	<meta name="twitter:title" content="IHSG — Nekotakumi Labs" />
+	<meta name="twitter:description" content="A snapshot of the Indonesian market, including the IHSG, USD/IDR, gold, and sector data." />
 	<meta name="twitter:image" content={ogImageUrl(page.url)} />
 	<script type="application/ld+json">
 		{jsonLd({
 			"@context": "https://schema.org",
 			"@type": "Dataset",
-			name: "Data IHSG Nekotakumi",
-			description: "Data IHSG, USD/IDR, emas, dan ringkasan sektor pasar Indonesia.",
+			name: "IHSG Market Snapshot",
+			description: "IHSG, USD/IDR, gold, and Indonesian market sector data.",
 			url: canonicalUrl(page.url, "/ihsg"),
 			creator: {
 				"@type": "Organization",
@@ -75,14 +75,14 @@
 <div class="page">
 	<div class="hero">
 		<h1>IHSG</h1>
-		<p class="subtitle">Data pasar Indonesia terbaru.</p>
+		<p class="subtitle">A quick look at the Indonesian market.</p>
 	{#if data.lastUpdated}
-		<p class="update-time">Update terakhir: {new Date(data.lastUpdated).toLocaleString("id-ID", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })} WIB</p>
+		<p class="update-time">Last updated {new Date(data.lastUpdated).toLocaleString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })} Jakarta time</p>
 	{/if}
 	</div>
 
 	{#if data.ihsgData === null}
-		<div class="empty">Belum ada data IHSG.</div>
+		<div class="empty">Market data is temporarily unavailable.</div>
 	{:else}
 		<div class="grid">
 			<div class="card">
@@ -111,7 +111,7 @@
 		<section class="sectors">
 			<div class="section-head">
 				<h2>Sector breakdown</h2>
-				<p>Sektor pasar tampil kalau data ada di source / DB.</p>
+				<p>Sector data appears when it is available from the data source.</p>
 			</div>
 
 			{#if sectors.length}
@@ -132,7 +132,7 @@
 							{/if}
 							{#if stocks.length}
 								<div class="stock-count">
-									{up.length} naik, {down.length} turun
+										{up.length} up, {down.length} down
 								</div>
 								<div class="stock-list">
 									{#if topUp.length}
@@ -155,15 +155,15 @@
 					{/each}
 				</div>
 			{:else}
-				<div class="empty">Tidak ada data sektor di source / DB.</div>
+				<div class="empty">No sector data is available yet.</div>
 			{/if}
 		</section>
 	{/if}
 
-	<section class="related-links" aria-label="Konten terkait">
-		<a href="/">Baca catatan blog</a>
-		<a href="/tech-news">Ikuti tech news</a>
-		<a href="/tentang">Tentang Nekotakumi</a>
+	<section class="related-links" aria-label="More from Nekotakumi Labs">
+		<a href="/blog">Read the blog</a>
+		<a href="/tech-news">Tech News</a>
+		<a href="/tentang">About the lab</a>
 	</section>
 </div>
 

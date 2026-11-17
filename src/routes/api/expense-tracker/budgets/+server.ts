@@ -23,9 +23,9 @@ export async function POST({ request }) {
   try {
     const { kategori_id, jumlah, periode, bulan, tahun } = await request.json();
     if (!kategori_id || jumlah == null || !periode)
-      return json({ error: "kategori_id, jumlah, periode required" }, { status: 400 });
+      return json({ error: "Category, amount, and period are required." }, { status: 400 });
     if (!["bulanan", "mingguan"].includes(periode))
-      return json({ error: "periode must be bulanan or mingguan" }, { status: 400 });
+      return json({ error: "Period must be monthly or weekly." }, { status: 400 });
     const [row] = await sql`
       INSERT INTO finansial.budget (kategori_id, jumlah, periode, bulan, tahun)
       VALUES (${kategori_id}, ${jumlah}, ${periode}, ${bulan || null}, ${tahun || null})
