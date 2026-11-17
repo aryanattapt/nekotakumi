@@ -60,7 +60,7 @@
 	.mini-brand span { color: var(--accent); }
 	.side-item { padding: 5px 6px; border-radius: 6px; color: #56564f; font-size: 12px; }
 	.side-item.active { background: var(--sprout); color: var(--accent-hover); font-weight: 700; }
-	.preview-main { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; }
+	.preview-main { display: flex; flex-direction: column; justify-content: space-between; gap: 10px; padding: 14px 16px; }
 	.preview-main > strong, .jobs-heading > strong { font: 600 clamp(14px, 1.35vw, 20px)/1.15 var(--font-display); letter-spacing: -0.04em; }
 	.source-note { display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid #d9d2c5; border-radius: 8px; background: #fffcf6; }
 	.source-note > i { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--accent); }
@@ -72,7 +72,7 @@
 	.draft-lines i:first-child { width: 91%; }
 	.draft-lines i:nth-child(2) { width: 74%; }
 	.draft-lines i:last-child { width: 59%; }
-	.jobs-screen { display: flex; flex-direction: column; gap: 12px; height: calc(100% - 30px); padding: 14px 16px; }
+	.jobs-screen { display: flex; flex-direction: column; justify-content: space-between; gap: 12px; height: calc(100% - 30px); padding: 14px 16px; }
 	.jobs-heading { display: grid; gap: 5px; }
 	.role-card { display: flex; align-items: center; gap: 9px; padding: 9px; border: 1px solid #d9d2c5; border-radius: 8px; background: #fffcf6; }
 	.role-mark { position: relative; display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 auto; border-radius: 8px; background: var(--sprout); }
@@ -89,8 +89,8 @@
 	.pharmacy-screen { display: flex; flex-direction: column; gap: 12px; height: calc(100% - 30px); padding: 13px 16px; }
 	.shop-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 	.shop-status { padding: 4px 6px; border-radius: 6px; background: var(--ochre); color: var(--ink); font: 500 12px var(--font-mono); }
-	.pharmacy-content { display: grid; grid-template-columns: 1fr 1.1fr; align-items: center; gap: 10px; }
-	.product-placeholder { display: grid; place-items: center; gap: 7px; min-height: 74px; border: 1px solid #e5ded2; border-radius: 8px; background: #f8f4ec; }
+	.pharmacy-content { display: grid; flex: 1; grid-template-columns: 1fr 1.1fr; align-items: stretch; gap: 10px; }
+	.product-placeholder { display: grid; place-items: center; align-content: center; gap: 7px; min-height: 74px; border: 1px solid #e5ded2; border-radius: 8px; background: #f8f4ec; }
 	.product-shape { width: 24px; height: 34px; border: 1px solid #8eaf8e; border-radius: 5px 5px 8px 8px; background: #d8e9c8; }
 	.product-lines { width: 70%; }
 	.product-lines i:first-child { width: 88%; }
