@@ -30,7 +30,7 @@
 		padding: 1.5rem;
 		border: 1px solid var(--border, #e6e8ef);
 		border-radius: calc(var(--radius, 18px) * 1.25);
-		background: radial-gradient(circle at 94% 0%, rgba(196, 181, 253, 0.2), transparent 22rem), linear-gradient(135deg, #fff, #f9faff);
+		background: var(--card);
 		box-shadow: var(--shadow-soft, 0 12px 32px rgba(24, 32, 51, 0.07));
 	}
 

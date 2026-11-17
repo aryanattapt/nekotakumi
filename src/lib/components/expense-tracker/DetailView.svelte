@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ArrowIcon from '$lib/components/ArrowIcon.svelte';
 	interface Transactions {
 		id: number;
 		tanggal: string;
@@ -96,9 +97,9 @@
 
 		{#if totalPages > 1}
 			<div class="pagination">
-				<button disabled={page <= 1} onclick={() => onPageChange?.(page - 1)}>← Prev</button>
+				<button disabled={page <= 1} onclick={() => onPageChange?.(page - 1)}><ArrowIcon direction="left" /> Prev</button>
 				<span>Page {page} of {totalPages}</span>
-				<button disabled={page >= totalPages} onclick={() => onPageChange?.(page + 1)}>Next →</button>
+				<button disabled={page >= totalPages} onclick={() => onPageChange?.(page + 1)}>Next <ArrowIcon direction="right" /></button>
 			</div>
 		{/if}
 	{/if}
@@ -128,7 +129,7 @@
 		color: var(--text, #1a1a2e);
 	}
 	.group-subtotal {
-		color: var(--accent, #7c3aed);
+		color: var(--accent, #2f7d4a);
 	}
 	.group-rows {
 		padding: 0.25rem 0;
@@ -155,7 +156,7 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 1rem 1.25rem;
-		background: var(--accent, #7c3aed);
+		background: var(--accent, #2f7d4a);
 		color: #fff;
 		border-radius: var(--radius, 12px);
 		font-weight: 700;

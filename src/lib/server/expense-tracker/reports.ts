@@ -170,7 +170,7 @@ export async function buildPdfReport(report: MonthlyReportData) {
 
 		const drawTableHeader = () => {
 			doc.fontSize(10).fillColor('#ffffff');
-			doc.rect(doc.page.margins.left, y, pageWidth, rowHeight).fill('#7C3AED');
+			doc.rect(doc.page.margins.left, y, pageWidth, rowHeight).fill('#2F7D4A');
 
 			doc.fillColor('#ffffff').text('Month', columnX[0] + 6, y + 6, {
 				width: columnWidths[0] - 12

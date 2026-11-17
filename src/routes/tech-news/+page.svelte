@@ -216,10 +216,8 @@
 		align-items: end;
 		padding: 2rem;
 		border: 1px solid var(--border);
-		border-radius: calc(var(--radius) * 1.5);
-		background:
-			radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 42%),
-			linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.86));
+		border-radius: var(--radius);
+		background: var(--card);
 		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.06);
 	}
 
@@ -228,8 +226,8 @@
 		align-items: center;
 		text-transform: uppercase;
 		letter-spacing: 0.18em;
-		font-size: 0.72rem;
-		color: #0284c7;
+		font-size: 12px;
+		color: var(--accent-hover);
 		font-weight: 700;
 		margin-bottom: 0.75rem;
 	}
@@ -257,14 +255,13 @@
 		min-width: 110px;
 		padding: 0.95rem 1rem;
 		border-radius: 1rem;
-		background: rgba(255, 255, 255, 0.8);
+		background: var(--card);
 		border: 1px solid var(--border);
-		backdrop-filter: blur(10px);
 	}
 
 	.stat-label {
 		display: block;
-		font-size: 0.72rem;
+		font-size: 12px;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		color: var(--text-muted);
@@ -304,15 +301,15 @@
 		padding: 0.9rem 1rem;
 		border: 1px solid var(--border);
 		border-radius: 1rem;
-		background: rgba(255, 255, 255, 0.92);
+		background: var(--card);
 		color: var(--text);
 		font-size: 1rem;
 		box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
 	}
 
 	.search input:focus {
-		outline: 2px solid color-mix(in srgb, #0ea5e9 18%, transparent);
-		border-color: color-mix(in srgb, #0ea5e9 42%, white);
+		outline: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+		border-color: color-mix(in srgb, var(--accent) 45%, white);
 	}
 
 	.ghost-button,
@@ -320,13 +317,13 @@
 	.page-number,
 	.source-link {
 		border: 1px solid var(--border);
-		background: rgba(255, 255, 255, 0.92);
+		background: var(--card);
 		color: var(--text);
-		border-radius: 999px;
+		border-radius: var(--radius);
 		padding: 0.8rem 1rem;
 		font-weight: 600;
 		cursor: pointer;
-		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+		transition: transform var(--duration-ui) var(--ease-spring);
 	}
 
 	.ghost-button:hover,
@@ -334,8 +331,6 @@
 	.page-number:hover,
 	.source-link:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-		border-color: color-mix(in srgb, #0ea5e9 22%, var(--border));
 		text-decoration: none;
 	}
 
@@ -355,9 +350,9 @@
 
 	.state-card {
 		padding: 2rem;
-		border-radius: 1.25rem;
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
-		background: rgba(255, 255, 255, 0.88);
+		background: var(--card);
 		text-align: center;
 		color: var(--text-muted);
 	}
@@ -371,11 +366,11 @@
 
 	.post-card {
 		padding: 1.3rem;
-		border-radius: 1.25rem;
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 252, 255, 0.94));
+		background: var(--card);
 		box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
-		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		transition: transform var(--duration-ui) var(--ease-spring);
 	}
 
 	.post-card:hover {
@@ -397,16 +392,16 @@
 		display: inline-flex;
 		align-items: center;
 		padding: 0.32rem 0.7rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, #0ea5e9 11%, white);
-		color: #0284c7;
-		font-size: 0.72rem;
+		border-radius: var(--radius);
+		background: var(--sprout);
+		color: var(--accent-hover);
+		font-size: 12px;
 		font-weight: 700;
 	}
 
 	.pill.alt {
-		background: color-mix(in srgb, var(--accent) 10%, white);
-		color: var(--accent);
+		background: var(--sprout);
+		color: var(--accent-hover);
 	}
 
 	h2 {
@@ -420,7 +415,7 @@
 	}
 
 	h2 a:hover {
-		color: #0284c7;
+		color: var(--accent-hover);
 		text-decoration: none;
 	}
 
@@ -455,7 +450,7 @@
 		padding: 1rem;
 		border: 1px solid var(--border);
 		border-radius: 1.1rem;
-		background: rgba(255, 255, 255, 0.76);
+		background: var(--card);
 	}
 
 	.related-links {
@@ -467,9 +462,9 @@
 
 	.related-links a {
 		border: 1px solid var(--border);
-		border-radius: 999px;
+		border-radius: var(--radius);
 		padding: 0.7rem 0.95rem;
-		background: rgba(255, 255, 255, 0.88);
+		background: var(--card);
 		font-weight: 700;
 	}
 
@@ -481,8 +476,8 @@
 	}
 
 	.page-number.active {
-		background: #0284c7;
-		border-color: #0284c7;
+		background: var(--accent);
+		border-color: var(--accent);
 		color: white;
 	}
 

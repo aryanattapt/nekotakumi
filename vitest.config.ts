@@ -25,6 +25,8 @@ export default defineConfig({
 			include: [
 				'src/lib/seo.ts',
 				'src/lib/server/listing.ts',
+				'src/lib/blog-meta.ts',
+				'src/lib/projects.ts',
 				'src/lib/server/expense-tracker/auth.ts',
 				'src/lib/server/expense-tracker/dedup.ts',
 				'src/lib/server/expense-tracker/queries.ts',

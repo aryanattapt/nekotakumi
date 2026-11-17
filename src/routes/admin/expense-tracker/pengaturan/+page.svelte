@@ -115,7 +115,7 @@
 	.card-header {
 		padding: 1rem 1.25rem;
 		border-bottom: 1px solid var(--border, #e5e7eb);
-		background: linear-gradient(90deg, #f7f3ff, #f7fbff);
+		background: #ebe4d7;
 	}
 	.card-header h3 { margin: 0; font-size: 1rem; }
 	.card-body { padding: 1.25rem; }

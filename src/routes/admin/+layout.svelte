@@ -113,7 +113,7 @@
 		align-items: center;
 		min-height: 68vh;
 		padding: 1rem;
-		background: radial-gradient(ellipse at 50% 35%, rgba(196, 181, 253, 0.2), transparent 27rem);
+		background: var(--paper);
 	}
 	.login-card {
 		background: var(--bg-card, #fff);
@@ -146,7 +146,7 @@
 	button {
 		width: 100%;
 		padding: 0.75rem;
-		background: var(--accent, #7c3aed);
+		background: var(--accent, #2f7d4a);
 		color: #fff;
 		border: none;
 		border-radius: 8px;
@@ -159,7 +159,7 @@
 		cursor: not-allowed;
 	}
 	button:hover:not(:disabled) {
-		background: var(--accent-hover, #6d28d9);
+		background: var(--accent-hover, #1f5a35);
 		transform: translateY(-1px);
 		box-shadow: 0 9px 22px rgba(109, 40, 217, 0.22);
 	}

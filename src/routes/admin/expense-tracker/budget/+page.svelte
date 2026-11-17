@@ -286,7 +286,7 @@
 		padding: 0.5rem 1rem;
 		border: none;
 		border-radius: 8px;
-		background: var(--accent, #7c3aed);
+		background: var(--accent, #2f7d4a);
 		color: #fff;
 		font-size: 0.85rem;
 		cursor: pointer;

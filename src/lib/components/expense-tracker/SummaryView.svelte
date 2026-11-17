@@ -28,7 +28,7 @@
 					title={source.sumber}
 					count={source.count}
 					total={source.total}
-					color={sourceColors[source.sumber] || '#7c3aed'}
+					color={sourceColors[source.sumber] || '#2f7d4a'}
 				/>
 			{/each}
 		</div>
@@ -54,7 +54,7 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 1rem 1.25rem;
-		background: var(--accent, #7c3aed);
+		background: var(--accent, #2f7d4a);
 		color: #fff;
 		border-radius: var(--radius, 12px);
 	}

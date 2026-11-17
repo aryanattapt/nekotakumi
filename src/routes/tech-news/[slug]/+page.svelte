@@ -94,11 +94,9 @@
 
 	.card {
 		padding: 2rem;
-		border-radius: calc(var(--radius) * 1.35);
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
-		background:
-			radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 38%),
-			linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 252, 255, 0.94));
+		background: var(--card);
 		box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
 	}
 
@@ -114,9 +112,9 @@
 	.back {
 		display: inline-flex;
 		padding: 0.6rem 0.85rem;
-		border-radius: 999px;
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
-		background: rgba(255, 255, 255, 0.86);
+		background: var(--card);
 		font-size: 0.9rem;
 		font-weight: 600;
 	}
@@ -124,9 +122,9 @@
 	.source {
 		display: inline-flex;
 		padding: 0.35rem 0.7rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, #0ea5e9 11%, white);
-		color: #0284c7;
+		border-radius: var(--radius);
+		background: var(--sprout);
+		color: var(--accent-hover);
 		font-weight: 700;
 		font-size: 0.8rem;
 	}
@@ -218,9 +216,9 @@
 
 	.related-links a {
 		border: 1px solid var(--border);
-		border-radius: 999px;
+		border-radius: var(--radius);
 		padding: 0.7rem 0.95rem;
-		background: rgba(255, 255, 255, 0.9);
+		background: var(--card);
 		font-weight: 700;
 	}
 

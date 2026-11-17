@@ -2,11 +2,13 @@
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import { onMount } from "svelte";
+	import ArrowIcon from '$lib/components/ArrowIcon.svelte';
 
 	let showTop = $state(false);
 
 	function isDetailPage(pathname: string) {
 		return (
+			(pathname.startsWith('/experiments/') && pathname !== '/experiments') ||
 			(pathname.startsWith("/blog/") && pathname !== "/blog") ||
 			(pathname.startsWith("/tech-news/") && pathname !== "/tech-news") ||
 			(pathname.startsWith("/astronomy-news/") && pathname !== "/astronomy-news")
@@ -14,6 +16,7 @@
 	}
 
 	function getFallbackPath(pathname: string) {
+		if (pathname.startsWith('/experiments/')) return '/#experiments';
 		if (pathname.startsWith("/blog/")) return "/blog";
 		if (pathname.startsWith("/tech-news/")) return "/tech-news";
 		if (pathname.startsWith("/astronomy-news/")) return "/astronomy-news";
@@ -55,13 +58,13 @@
 	<div class="floating-actions" aria-label="Quick actions">
 		{#if isDetailPage(page.url.pathname)}
 			<button class="fab secondary" type="button" onclick={goBack} aria-label="Go back">
-				<span aria-hidden="true">←</span>
+				<ArrowIcon direction="left" size={20} />
 			</button>
 		{/if}
 
 		{#if showTop}
 			<button class="fab primary" type="button" onclick={scrollToTop} aria-label="Back to top">
-				<span aria-hidden="true">↑</span>
+				<ArrowIcon direction="up" size={20} />
 			</button>
 		{/if}
 	</div>
@@ -70,25 +73,24 @@
 <style>
 	.floating-actions {
 		position: fixed;
-		right: 1rem;
-		bottom: 1rem;
+		right: max(12px, env(safe-area-inset-right));
+		bottom: max(12px, env(safe-area-inset-bottom));
 		display: flex;
 		flex-direction: column;
-		gap: 0.7rem;
+		gap: 0.5rem;
 		z-index: 50;
 	}
 
 	.fab {
 		width: 3rem;
 		height: 3rem;
-		border-radius: 999px;
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
-		box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
-		backdrop-filter: blur(10px);
-		font-size: 1.15rem;
+		box-shadow: 0 8px 24px rgba(26, 26, 23, 0.14);
+		font-size: 1.25rem;
 		font-weight: 700;
 		cursor: pointer;
-		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+		transition: transform var(--duration-ui) var(--ease-spring);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -96,28 +98,30 @@
 
 	.fab:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
 	}
 
 	.fab.primary {
-		background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+		background: var(--accent);
 		color: white;
 	}
 
 	.fab.secondary {
-		background: rgba(255, 255, 255, 0.92);
+		background: var(--card);
 		color: var(--text);
 	}
 
 	@media (max-width: 640px) {
 		.floating-actions {
-			right: 0.75rem;
-			bottom: 0.75rem;
+			right: max(12px, env(safe-area-inset-right));
+			bottom: max(12px, env(safe-area-inset-bottom));
 		}
 
 		.fab {
-			width: 2.8rem;
-			height: 2.8rem;
+			width: 48px;
+			height: 48px;
 		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.fab { transition: none; }
 	}
 </style>

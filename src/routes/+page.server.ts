@@ -11,7 +11,13 @@ export async function load({ url, setHeaders }) {
 
 	try {
 		const latestPosts = await db
-			.select({ title: posts.title, slug: posts.slug, excerpt: posts.excerpt, createdAt: posts.createdAt })
+			.select({
+				title: posts.title,
+				slug: posts.slug,
+				excerpt: posts.excerpt,
+				content: posts.content,
+				createdAt: posts.createdAt
+			})
 			.from(posts)
 			.where(eq(posts.published, true))
 			.orderBy(desc(posts.createdAt))

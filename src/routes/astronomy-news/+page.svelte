@@ -163,10 +163,8 @@
 		align-items: end;
 		padding: 2rem;
 		border: 1px solid var(--border);
-		border-radius: calc(var(--radius) * 1.5);
-		background:
-			radial-gradient(circle at top left, rgba(59, 130, 246, 0.15), transparent 42%),
-			linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(250, 250, 255, 0.88));
+		border-radius: var(--radius);
+		background: var(--card);
 		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.06);
 	}
 
@@ -175,8 +173,8 @@
 		align-items: center;
 		text-transform: uppercase;
 		letter-spacing: 0.18em;
-		font-size: 0.72rem;
-		color: #2563eb;
+		font-size: 12px;
+		color: var(--accent-hover);
 		font-weight: 700;
 		margin-bottom: 0.75rem;
 	}
@@ -204,14 +202,13 @@
 		min-width: 110px;
 		padding: 0.95rem 1rem;
 		border-radius: 1rem;
-		background: rgba(255, 255, 255, 0.8);
+		background: var(--card);
 		border: 1px solid var(--border);
-		backdrop-filter: blur(10px);
 	}
 
 	.stat-label {
 		display: block;
-		font-size: 0.72rem;
+		font-size: 12px;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		color: var(--text-muted);
@@ -226,9 +223,9 @@
 	.state-card {
 		padding: 2rem;
 		margin-top: 1.25rem;
-		border-radius: 1.25rem;
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
-		background: rgba(255, 255, 255, 0.88);
+		background: var(--card);
 		text-align: center;
 		color: var(--text-muted);
 	}
@@ -242,11 +239,11 @@
 
 	.post-card {
 		padding: 1.3rem;
-		border-radius: 1.25rem;
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 252, 255, 0.94));
+		background: var(--card);
 		box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
-		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		transition: transform var(--duration-ui) var(--ease-spring);
 	}
 
 	.post-card:hover {
@@ -268,16 +265,16 @@
 		display: inline-flex;
 		align-items: center;
 		padding: 0.32rem 0.7rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, #2563eb 10%, white);
-		color: #2563eb;
-		font-size: 0.72rem;
+		border-radius: var(--radius);
+		background: var(--sprout);
+		color: var(--accent-hover);
+		font-size: 12px;
 		font-weight: 700;
 	}
 
 	.pill.alt {
-		background: color-mix(in srgb, var(--accent) 10%, white);
-		color: var(--accent);
+		background: var(--sprout);
+		color: var(--accent-hover);
 	}
 
 	h2 {
@@ -291,7 +288,7 @@
 	}
 
 	h2 a:hover {
-		color: #2563eb;
+		color: var(--accent-hover);
 		text-decoration: none;
 	}
 
@@ -317,7 +314,7 @@
 		padding: 1rem;
 		border: 1px solid var(--border);
 		border-radius: 1.1rem;
-		background: rgba(255, 255, 255, 0.76);
+		background: var(--card);
 	}
 
 	.related-links {
@@ -329,9 +326,9 @@
 
 	.related-links a {
 		border: 1px solid var(--border);
-		border-radius: 999px;
+		border-radius: var(--radius);
 		padding: 0.7rem 0.95rem;
-		background: rgba(255, 255, 255, 0.88);
+		background: var(--card);
 		font-weight: 700;
 	}
 
@@ -345,20 +342,18 @@
 	.page-step,
 	.page-number {
 		border: 1px solid var(--border);
-		background: rgba(255, 255, 255, 0.92);
+		background: var(--card);
 		color: var(--text);
-		border-radius: 999px;
+		border-radius: var(--radius);
 		padding: 0.8rem 1rem;
 		font-weight: 600;
 		cursor: pointer;
-		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+		transition: transform var(--duration-ui) var(--ease-spring);
 	}
 
 	.page-step:hover,
 	.page-number:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-		border-color: color-mix(in srgb, #2563eb 22%, var(--border));
 	}
 
 	.page-step:disabled,
@@ -370,8 +365,8 @@
 	}
 
 	.page-number.active {
-		background: #2563eb;
-		border-color: #2563eb;
+		background: var(--accent);
+		border-color: var(--accent);
 		color: white;
 	}
 

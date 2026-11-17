@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { title, count, total, color = '#7c3aed' }: { title: string; count: number; total: number; color?: string } = $props();
+	let { title, count, total, color = '#2f7d4a' }: { title: string; count: number; total: number; color?: string } = $props();
 
 	function fmtRp(val: number): string {
 		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);

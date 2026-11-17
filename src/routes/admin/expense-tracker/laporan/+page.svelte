@@ -177,7 +177,7 @@
 		padding: 1.25rem;
 		border: 1px solid var(--border, #e5e7eb);
 		border-radius: calc(var(--radius, 12px) * 1.1);
-		background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(255, 255, 255, 0.96));
+		background: var(--card);
 	}
 
 	.eyebrow {
@@ -186,7 +186,7 @@
 		font-weight: 800;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
-		color: var(--accent, #7c3aed);
+		color: var(--accent, #2f7d4a);
 	}
 
 	h2 {
@@ -300,7 +300,7 @@
 		padding: 0.5rem 1rem;
 		border: none;
 		border-radius: 8px;
-		background: var(--accent, #7c3aed);
+		background: var(--accent, #2f7d4a);
 		color: #fff;
 		font-size: 0.85rem;
 		cursor: pointer;

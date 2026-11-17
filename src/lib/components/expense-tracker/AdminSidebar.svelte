@@ -75,7 +75,7 @@
 		text-decoration: none;
 	}
 	.group-header.active {
-		color: var(--accent, #7c3aed);
+		color: var(--accent, #2f7d4a);
 	}
 	a {
 		display: flex;
@@ -93,7 +93,7 @@
 		text-decoration: none;
 	}
 	a.active {
-		background: var(--accent, #7c3aed);
+		background: var(--accent, #2f7d4a);
 		color: #fff;
 		font-weight: 600;
 	}

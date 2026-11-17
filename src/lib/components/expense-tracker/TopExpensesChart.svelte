@@ -21,7 +21,7 @@
 						<span class="amount">{fmtRp(expense.jumlah)}</span>
 					</div>
 					<div class="track">
-						<div class="fill" style={`width: ${maxVal ? Math.max((expense.jumlah / maxVal) * 100, 4) : 0}%; background: ${['#7c3aed','#a855f7','#c084fc','#d8b4fe','#10b981','#34d399','#6ee7b7','#f59e0b','#fbbf24','#fcd34d'][i % 10]};`}></div>
+						<div class="fill" style={`width: ${maxVal ? Math.max((expense.jumlah / maxVal) * 100, 4) : 0}%; background: ${['#2f7d4a','#1f5a35','#5d966b','#cfe8b8','#10b981','#34d399','#6ee7b7','#f59e0b','#fbbf24','#fcd34d'][i % 10]};`}></div>
 					</div>
 				</div>
 			{/each}

@@ -1,41 +1,63 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import ArrowIcon from '$lib/components/ArrowIcon.svelte';
+	import ProjectPreview from '$lib/components/ProjectPreview.svelte';
+	import { detectLanguage, estimateReadingMinutes } from '$lib/blog-meta';
+	import { revealOnce } from '$lib/actions/reveal';
+	import { formatProjectDate, projects } from '$lib/projects';
 	import { canonicalUrl, defaultDescription, jsonLd, ogImageUrl, siteName } from '$lib/seo';
 
 	let { data } = $props();
 
-	const experiments = [
-		{
-			number: '01',
-			name: 'Takumi Research Agent',
-			category: 'AI · Research',
-			status: 'In development',
-			description: 'An AI research workflow that traces its sources and prepares article drafts in Indonesian and English.',
-			url: 'https://github.com/aryanattapt/takumi-research-agent-v0',
-			color: 'violet',
-			mark: 'T'
-		},
-		{
-			number: '02',
-			name: 'Takumi Job Search Assistant',
-			category: 'AI · Personal tools',
-			status: 'In development',
-			description: 'A self-hosted workspace for researching roles, preparing applications, and keeping the process organized.',
-			url: 'https://github.com/aryanattapt/takumi-jobsearch-assistant',
-			color: 'blue',
-			mark: 'J'
-		},
-		{
-			number: '03',
-			name: 'FarmaGO',
-			category: 'Product · Healthcare',
-			status: 'MVP in development',
-			description: 'An e-pharmacy MVP exploring product discovery, pharmacy selection, prescription review, and delivery.',
-			url: 'https://github.com/aryanattapt/farmago',
-			color: 'coral',
-			mark: 'F'
-		}
-	];
+	let dragging: {
+		element: HTMLButtonElement;
+		pointerId: number;
+		startX: number;
+		startY: number;
+		originX: number;
+		originY: number;
+	} | null = null;
+
+	function startStickerDrag(event: PointerEvent, element: HTMLButtonElement) {
+		if (event.pointerType !== 'mouse' || event.button !== 0 || window.matchMedia('(max-width: 720px)').matches) return;
+		event.preventDefault();
+		dragging = {
+			element,
+			pointerId: event.pointerId,
+			startX: event.clientX,
+			startY: event.clientY,
+			originX: Number.parseFloat(element.style.getPropertyValue('--drag-x')) || 0,
+			originY: Number.parseFloat(element.style.getPropertyValue('--drag-y')) || 0
+		};
+		element.setPointerCapture(event.pointerId);
+	}
+
+	function moveSticker(event: PointerEvent) {
+		if (!dragging || dragging.pointerId !== event.pointerId) return;
+		dragging.element.style.setProperty('--drag-x', `${dragging.originX + event.clientX - dragging.startX}px`);
+		dragging.element.style.setProperty('--drag-y', `${dragging.originY + event.clientY - dragging.startY}px`);
+	}
+
+	function endStickerDrag(event: PointerEvent) {
+		if (!dragging || dragging.pointerId !== event.pointerId) return;
+		dragging = null;
+	}
+
+	function nudgeSticker(event: KeyboardEvent, element: HTMLButtonElement) {
+		const steps: Record<string, [number, number]> = {
+			ArrowUp: [0, -8],
+			ArrowDown: [0, 8],
+			ArrowLeft: [-8, 0],
+			ArrowRight: [8, 0]
+		};
+		const step = steps[event.key];
+		if (!step) return;
+		event.preventDefault();
+		const x = Number.parseFloat(element.style.getPropertyValue('--drag-x')) || 0;
+		const y = Number.parseFloat(element.style.getPropertyValue('--drag-y')) || 0;
+		element.style.setProperty('--drag-x', `${x + step[0]}px`);
+		element.style.setProperty('--drag-y', `${y + step[1]}px`);
+	}
 </script>
 
 <svelte:head>
@@ -64,66 +86,110 @@
 
 <div class="home-page">
 	<section class="hero">
-		<div class="hero-copy motion-rise">
+		<div class="hero-copy">
 			<p class="eyebrow"><span class="status-dot"></span> Independent R&amp;D · Jakarta, Indonesia</p>
-			<h1>Build <span>Inspiring</span><br />Trash<span class="period">.</span></h1>
-			<p class="hero-lead">A personal lab for software experiments, side projects, and things I want to figure out.</p>
+			<h1 aria-label="Build Inspiring Trash.">
+				<span class="hero-word" style="--word-delay: 0ms">Build</span>
+				<span class="hero-word hero-word-green" style="--word-delay: 80ms">Inspiring</span><br />
+				<span class="hero-word" style="--word-delay: 160ms">Trash</span><span class="period">.</span>
+			</h1>
+			<p class="hero-lead">The unfinished experiments are the useful part: each one leaves behind a lesson, a tool, or a better question.</p>
 			<div class="hero-actions">
-				<a class="button button-primary" href="#experiments">See what I’m building <span aria-hidden="true">↘</span></a>
-				<a class="button button-quiet" href="/blog">Read the blog <span aria-hidden="true">↗</span></a>
+				<a class="button button-primary" href="#experiments">See what I’m building <ArrowIcon direction="down-right" /></a>
+				<a class="button button-quiet" href="/blog">Read the blog <ArrowIcon /></a>
 			</div>
-			<div class="hero-note"><span class="note-line"></span><span>Curiosity in. Experiments out.</span></div>
 		</div>
 
-		<div class="hero-art" aria-label="Abstract illustration of ideas taking shape" role="img">
-			<div class="art-orbit orbit-one"></div>
-			<div class="art-orbit orbit-two"></div>
-			<div class="art-spark spark-one">✳</div>
-			<div class="art-spark spark-two">✦</div>
-			<div class="art-card card-back"><span>idea_004.md</span><i></i><i></i></div>
-			<div class="art-card card-front"><span class="card-label">CURRENT MOOD</span><strong>let’s<br />find out<span>!</span></strong><small>prototype in progress</small></div>
-			<div class="art-sticker">NO<br />BIG<br />DEAL</div>
-			<div class="art-footnote">a tiny corner of the internet <span>↗</span></div>
+		<div class="hero-art" role="group" aria-label="A couple of notes from the lab">
+			<button
+				type="button"
+				class="art-card card-back"
+				style="--angle: 7deg; --sticker-delay: 120ms"
+				aria-label="Move the idea note with your mouse or arrow keys"
+				onpointerdown={(event) => startStickerDrag(event, event.currentTarget)}
+				onpointermove={moveSticker}
+				onpointerup={endStickerDrag}
+				onpointercancel={endStickerDrag}
+				onkeydown={(event) => nudgeSticker(event, event.currentTarget)}
+			>
+				<span class="card-label">idea_004.md</span>
+				<strong>What if this<br />works?</strong>
+				<i></i><i></i>
+			</button>
+			<button
+				type="button"
+				class="art-card card-front"
+				style="--angle: -6deg; --sticker-delay: 220ms"
+				aria-label="Move the current build note with your mouse or arrow keys"
+				onpointerdown={(event) => startStickerDrag(event, event.currentTarget)}
+				onpointermove={moveSticker}
+				onpointerup={endStickerDrag}
+				onpointercancel={endStickerDrag}
+				onkeydown={(event) => nudgeSticker(event, event.currentTarget)}
+			>
+				<span class="card-label">CURRENTLY BUILDING</span>
+				<strong>FarmaGO<br />v0.x</strong>
+				<small>figuring out the next step</small>
+			</button>
+			<div class="art-sticker" role="img" aria-label="No big deal">NO<br />BIG<br />DEAL</div>
 		</div>
 	</section>
 
-	<section class="focus-line" aria-label="Areas of exploration">
+	<section class="focus-line reveal" use:revealOnce aria-label="Areas of exploration">
 		<span>Right now I’m exploring</span>
 		<div><span>AI &amp; automation</span><b>·</b><span>Useful little tools</span><b>·</b><span>Systems that work</span></div>
 	</section>
 
-	<section class="section experiments-section" id="experiments">
+	<section class="section experiments-section" id="experiments" use:revealOnce>
 		<div class="section-heading">
 			<div><p class="eyebrow">A few things in the works</p><h2>From “what if?” to<br class="mobile-break" /> something real.</h2></div>
-			<a class="text-link" href="https://github.com/aryanattapt?tab=repositories" target="_blank" rel="noopener noreferrer">More on GitHub <span aria-hidden="true">↗</span></a>
+			<a class="text-link" href="https://github.com/aryanattapt?tab=repositories" target="_blank" rel="noopener noreferrer">More on GitHub <ArrowIcon /></a>
 		</div>
 
 		<div class="experiment-grid">
-			{#each experiments as experiment, i}
-				<article class={`experiment-card ${experiment.color} motion-rise`} style={`--delay:${i * 90}ms`}>
-					<div class="experiment-top"><span class="experiment-number">{experiment.number} / EXPERIMENT</span><span class="experiment-mark">{experiment.mark}</span></div>
-					<div class="experiment-meta"><span>{experiment.category}</span><span class="experiment-status"><i></i>{experiment.status}</span></div>
-					<h3>{experiment.name}</h3>
-					<p>{experiment.description}</p>
-					<a href={experiment.url} target="_blank" rel="noopener noreferrer" aria-label={`View ${experiment.name} on GitHub`}>View on GitHub <span aria-hidden="true">↗</span></a>
+			{#each projects as project, i}
+				<article class="experiment-card reveal" use:revealOnce style={`--delay:${i * 60}ms`}>
+					<a class="preview-link" href={`/experiments/${project.slug}`} aria-label={`View ${project.name} experiment details`}>
+						<ProjectPreview {project} />
+					</a>
+					<div class="card-content">
+						<div class="experiment-top"><span class="experiment-number">{project.number} / EXPERIMENT</span><span class="category-tag" class:ai={project.category === 'AI'} class:product={project.category === 'Product'}>{project.categoryDetail}</span></div>
+						<span class="experiment-status"><i></i>{project.status}</span>
+						<h3><a href={`/experiments/${project.slug}`}>{project.name}</a></h3>
+						<div class="experiment-lines">
+							<p><strong>Problem</strong><span>{project.problem}</span></p>
+							<p><strong>Approach</strong><span>{project.approach}</span></p>
+						</div>
+						<div class="focus-chips" aria-label="Focus areas">
+							{#each project.focusAreas as area}<span>{area}</span>{/each}
+						</div>
+						<div class="card-footer">
+							<time datetime={project.updatedAt}>Updated {formatProjectDate(project.updatedAt)}</time>
+							<a href={project.githubUrl} target="_blank" rel="noopener noreferrer">View on GitHub <ArrowIcon /></a>
+						</div>
+					</div>
 				</article>
 			{/each}
 		</div>
 	</section>
 
-	<section class="section blog-section">
+	<section class="section blog-section" use:revealOnce>
 		<div class="section-heading">
 			<div><p class="eyebrow">Notes from the process</p><h2>From the blog.</h2></div>
-			<a class="text-link" href="/blog">All posts <span aria-hidden="true">↗</span></a>
+			<a class="text-link" href="/blog">All posts <ArrowIcon /></a>
 		</div>
 
 		{#if data.posts.length}
 			<div class="blog-list">
 				{#each data.posts as post, i}
-					<a class="blog-row motion-rise" style={`--delay:${i * 70}ms`} href={`/blog/${post.slug}`}>
-						<time>{new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</time>
+					<a class="blog-row reveal" use:revealOnce style={`--delay:${i * 50}ms`} href={`/blog/${post.slug}`}>
+						<span class="blog-row-meta">
+							<time>{new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</time>
+							<span class="language-tag">{detectLanguage(post.content)}</span>
+							<span class="read-time">{estimateReadingMinutes(post.content)} min read</span>
+						</span>
 						<span class="blog-row-copy"><strong>{post.title}</strong>{#if post.excerpt}<small>{post.excerpt}</small>{/if}</span>
-						<span class="row-arrow" aria-hidden="true">↗</span>
+						<span class="row-arrow"><ArrowIcon size={18} /></span>
 					</a>
 				{/each}
 			</div>
@@ -132,142 +198,171 @@
 		{/if}
 	</section>
 
-	<section class="maker-section">
+	<section class="maker-section reveal" use:revealOnce>
 		<div class="maker-mark" aria-hidden="true">a.</div>
 		<div><p class="eyebrow">The person behind the tabs</p><h2>Hey, I’m Arya.</h2><p>I’m a software developer who likes trying things out, learning as I go, and occasionally making a mess before it makes sense.</p></div>
-		<a class="button button-dark" href="/tentang">A little more about me <span aria-hidden="true">↗</span></a>
+		<a class="button button-dark" href="/tentang">A little more about me <ArrowIcon /></a>
 	</section>
 </div>
 
 <style>
-	.home-page { width: min(100% - 2rem, 1160px); margin: 0 auto; }
-	.hero { min-height: 570px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(350px, 0.95fr); align-items: center; gap: 2rem; padding: 4.5rem 0 3.5rem; }
-	.hero-copy { position: relative; z-index: 1; animation-delay: 70ms; }
-	.eyebrow { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.77rem; font-weight: 700; letter-spacing: 0.075em; text-transform: uppercase; }
-	.status-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #36b37e; box-shadow: 0 0 0 4px rgba(54, 179, 126, 0.12); }
-	h1 { margin: 0; font-size: clamp(4rem, 7.4vw, 6.7rem); line-height: 0.94; font-weight: 700; letter-spacing: -0.075em; }
-	h1 > span:first-child { color: var(--accent); }
-	.period { color: var(--coral); }
-	.hero-lead { max-width: 490px; margin: 1.4rem 0 1.6rem; color: var(--text-muted); font-size: clamp(1.05rem, 1.5vw, 1.2rem); line-height: 1.65; }
-	.hero-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; }
-	.button { display: inline-flex; align-items: center; justify-content: center; gap: 0.8rem; min-height: 48px; padding: 0.75rem 1rem; border-radius: 0.95rem; font-weight: 650; font-size: 0.9rem; transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease; }
+	.home-page { width: min(100% - 32px, 1180px); margin: 0 auto; }
+	.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: center; padding: 48px 0 32px; }
+	.hero-copy { position: relative; z-index: 1; }
+	.eyebrow { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; color: var(--text-muted); font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+	.status-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--accent); }
+	h1 { margin: 0; font-size: clamp(3.65rem, 17vw, 5.3rem); line-height: 0.94; font-weight: 700; letter-spacing: -0.075em; }
+	.hero-word { display: inline-block; opacity: 0; animation: word-rise 400ms var(--ease-spring) var(--word-delay, 0ms) forwards; }
+	.hero-word-green { color: var(--accent-hover); }
+	.period { color: var(--coral-ink); }
+	@keyframes word-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+	.hero-lead { max-width: 540px; margin: 24px 0; color: var(--text-muted); font-size: var(--type-lead); line-height: 1.6; }
+	.hero-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+	.button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 48px; padding: 12px 16px; border: 1px solid transparent; border-radius: var(--radius); font-size: 16px; font-weight: 650; transition: transform var(--duration-ui) var(--ease-spring); }
+	.button :global(svg), .text-link :global(svg), .card-footer a :global(svg) { width: 16px; height: 16px; }
 	.button:hover { transform: translateY(-2px); text-decoration: none; }
-	.button-primary { color: white; background: var(--accent); box-shadow: 0 8px 18px rgba(109, 40, 217, 0.18); }
-	.button-primary:hover { background: var(--accent-hover); box-shadow: 0 11px 23px rgba(109, 40, 217, 0.23); }
-	.button-quiet { color: var(--text); background: white; border: 1px solid var(--border); }
-	.button-quiet:hover { background: #fff; box-shadow: var(--shadow-soft); }
-	.hero-note { display: flex; align-items: center; gap: 0.55rem; margin-top: 2rem; color: #8a92a2; font-size: 0.8rem; }
-	.note-line { width: 28px; height: 1px; background: var(--coral); }
-	.hero-art { position: relative; width: min(100%, 485px); aspect-ratio: 1 / 0.88; justify-self: end; display: grid; place-items: center; isolation: isolate; }
-	.hero-art::before { content: ''; position: absolute; width: 77%; aspect-ratio: 1; border-radius: 50%; background: linear-gradient(145deg, #eee8ff, #dfedff); opacity: 0.85; z-index: -2; }
-	.art-orbit { position: absolute; width: 90%; height: 72%; border: 1px solid rgba(109, 40, 217, 0.22); border-radius: 50%; transform: rotate(-27deg); z-index: -1; }
-	.orbit-two { width: 106%; height: 88%; transform: rotate(24deg); border-color: rgba(37, 99, 235, 0.17); }
-	.art-card { position: absolute; width: 245px; min-height: 260px; border-radius: 1.25rem; box-shadow: 0 24px 55px rgba(47, 38, 92, 0.14); }
-	.card-back { right: 9%; top: 12%; padding: 1.3rem; transform: rotate(8deg); background: #d9f36f; color: #415115; }
-	.card-back span { display: block; font: 600 0.71rem ui-monospace, monospace; opacity: 0.66; margin-bottom: 2rem; }
-	.card-back i { display: block; height: 8px; width: 77%; margin: 0.65rem 0; border-radius: 20px; background: rgba(56, 73, 17, 0.17); }
+	.button-primary { background: var(--accent); color: white; }
+	.button-primary:hover { background: var(--accent-hover); color: white; }
+	.button-quiet { border-color: var(--border); background: var(--card); color: var(--ink); }
+	.button-quiet:hover { border-color: var(--ink); }
+	.hero-art { position: relative; width: min(100%, 440px); aspect-ratio: 1 / 0.88; justify-self: center; isolation: isolate; }
+	.art-card { position: absolute; width: min(62%, 240px); min-height: 244px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; border: 1px solid rgba(26, 26, 23, 0.12); border-radius: var(--radius); box-shadow: 0 16px 32px rgba(26, 26, 23, 0.12); color: var(--ink); text-align: left; cursor: grab; touch-action: pan-y; user-select: none; transform: translate(var(--drag-x, 0px), var(--drag-y, 0px)) rotate(var(--angle)); animation: sticker-drop 380ms var(--ease-spring) var(--sticker-delay, 0ms) both; }
+	.art-card:active { cursor: grabbing; }
+	.card-back { top: 9%; right: 8%; background: var(--ochre); }
+	.card-front { bottom: 7%; left: 7%; background: var(--card); }
+	@keyframes sticker-drop { from { opacity: 0; transform: translate(var(--drag-x, 0px), -24px) rotate(calc(var(--angle) - 6deg)); } to { opacity: 1; transform: translate(var(--drag-x, 0px), var(--drag-y, 0px)) rotate(var(--angle)); } }
+	.art-card:hover:not(:focus-visible) { animation: sticker-wobble 280ms var(--ease-spring) both; }
+	@keyframes sticker-wobble { 0%, 100% { transform: translate(var(--drag-x, 0px), var(--drag-y, 0px)) rotate(var(--angle)); } 40% { transform: translate(var(--drag-x, 0px), var(--drag-y, 0px)) rotate(calc(var(--angle) + 3deg)); } 72% { transform: translate(var(--drag-x, 0px), var(--drag-y, 0px)) rotate(calc(var(--angle) - 2deg)); } }
+	.card-label { color: #43443d; font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.045em; }
+	.card-back strong { margin-top: auto; font: 600 clamp(28px, 3vw, 36px)/0.98 var(--font-display); letter-spacing: -0.06em; }
+	.card-back i { display: block; width: 78%; height: 7px; margin-top: 8px; border-radius: 8px; background: rgba(26, 26, 23, 0.2); }
 	.card-back i:last-child { width: 48%; }
-	.card-front { left: 8%; bottom: 11%; display: flex; flex-direction: column; justify-content: space-between; padding: 1.35rem; transform: rotate(-7deg); background: #fff; color: var(--text); }
-	.card-label { font: 700 0.66rem ui-monospace, monospace; color: var(--text-muted); letter-spacing: 0.08em; }
-	.card-front strong { font: 700 2.45rem/0.98 'Space Grotesk', sans-serif; letter-spacing: -0.07em; }
-	.card-front strong span { color: var(--coral); }
-	.card-front small { color: var(--text-muted); font-size: 0.72rem; }
-	.art-sticker { position: absolute; right: 1%; bottom: 10%; display: grid; place-items: center; width: 82px; height: 82px; border-radius: 50%; background: var(--coral); color: white; text-align: center; transform: rotate(10deg); font-size: 0.64rem; font-weight: 800; line-height: 1.05; letter-spacing: 0.04em; box-shadow: 0 8px 20px rgba(231, 107, 87, 0.22); animation: gentle-bob 4s ease-in-out infinite; }
-	.art-spark { position: absolute; color: var(--accent); font-size: 2.2rem; animation: gentle-bob 4.5s ease-in-out infinite; }
-	.spark-one { top: 7%; left: 10%; }
-	.spark-two { right: 9%; top: 28%; color: var(--cobalt); font-size: 1.5rem; animation-delay: -1.3s; }
-	.art-footnote { position: absolute; right: 4%; bottom: 1%; color: var(--text-muted); font-size: 0.7rem; transform: rotate(-4deg); }
-	.art-footnote span { color: var(--accent); }
-	@keyframes gentle-bob { 0%, 100% { transform: translateY(0) rotate(10deg); } 50% { transform: translateY(-7px) rotate(7deg); } }
-	.focus-line { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.4rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.84rem; }
+	.card-front strong { margin: auto 0; font: 700 clamp(30px, 4vw, 44px)/0.98 var(--font-display); letter-spacing: -0.07em; }
+	.card-front small { color: var(--text-muted); font-size: 14px; }
+	.art-sticker { position: absolute; right: 0; bottom: 6%; display: grid; place-items: center; width: 82px; height: 82px; border-radius: 50%; background: var(--coral); color: var(--ink); text-align: center; font: 700 12px/1.05 var(--font-body); letter-spacing: 0.03em; animation: badge-pop 300ms var(--ease-spring) 350ms both; }
+	@keyframes badge-pop { from { opacity: 0; transform: scale(0.76) rotate(-10deg); } to { opacity: 1; transform: scale(1) rotate(6deg); } }
+	.focus-line { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 16px; }
 	.focus-line > span { font-weight: 600; }
-	.focus-line div { display: flex; flex-wrap: wrap; gap: 0.65rem; align-items: center; color: var(--text); }
-	.focus-line b { color: var(--coral); font-size: 1.1rem; }
-	.section { padding: 5.3rem 0 0; }
-	.section-heading { display: flex; justify-content: space-between; align-items: end; gap: 1.5rem; margin-bottom: 1.6rem; }
-	.section-heading .eyebrow { margin-bottom: 0.5rem; }
-	.section-heading h2, .maker-section h2 { font-size: clamp(2rem, 4vw, 3.1rem); line-height: 1.05; letter-spacing: -0.06em; }
-	.text-link { display: inline-flex; gap: 0.55rem; align-items: center; color: var(--accent); font-weight: 700; font-size: 0.88rem; white-space: nowrap; }
-	.text-link:hover { gap: 0.75rem; text-decoration: none; }
-	.experiment-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-	.experiment-card { --card-accent: var(--accent); position: relative; min-height: 300px; display: flex; flex-direction: column; align-items: flex-start; padding: 1.35rem; overflow: hidden; border: 1px solid var(--border); border-radius: 1.25rem; background: white; transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease; animation-delay: var(--delay, 0ms); }
-	.experiment-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--card-accent); }
-	.experiment-card:hover { transform: translateY(-5px); border-color: color-mix(in srgb, var(--card-accent) 30%, var(--border)); box-shadow: 0 18px 38px rgba(24, 32, 51, 0.1); }
-	.experiment-card.violet { --card-accent: #8255dc; }
-	.experiment-card.blue { --card-accent: #4283ee; }
-	.experiment-card.coral { --card-accent: #e76b57; }
-	.experiment-top { display: flex; width: 100%; align-items: center; justify-content: space-between; margin-bottom: 1.3rem; }
-	.experiment-number { color: var(--text-muted); font: 600 0.65rem ui-monospace, monospace; letter-spacing: 0.055em; }
-	.experiment-mark { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 0.9rem; background: color-mix(in srgb, var(--card-accent) 12%, white); color: var(--card-accent); font: 700 1.2rem 'Space Grotesk', sans-serif; }
-	.experiment-meta { display: grid; gap: 0.35rem; color: var(--text-muted); font-size: 0.72rem; }
-	.experiment-status { display: inline-flex; align-items: center; gap: 0.4rem; }
-	.experiment-status i { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #56b889; }
-	.experiment-card h3 { margin: 0.8rem 0 0.5rem; font-size: 1.3rem; line-height: 1.15; letter-spacing: -0.045em; }
-	.experiment-card p { margin-bottom: 1.3rem; color: var(--text-muted); font-size: 0.88rem; line-height: 1.58; }
-	.experiment-card > a { display: inline-flex; gap: 0.45rem; align-items: center; margin-top: auto; color: var(--card-accent); font-size: 0.84rem; font-weight: 700; }
-	.experiment-card > a span { transition: transform 160ms ease; }
-	.experiment-card > a:hover span { transform: translate(2px, -2px); }
-	.blog-section { padding-top: 5.5rem; }
+	.focus-line div { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: var(--ink); }
+	.focus-line b { color: var(--coral-ink); font-size: 18px; }
+	.section { padding: 64px 0 0; }
+	.section-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 24px; }
+	.section-heading .eyebrow { margin-bottom: 8px; }
+	.section-heading h2, .maker-section h2 { font-size: clamp(32px, 4vw, 48px); line-height: 1.04; letter-spacing: -0.06em; }
+	.text-link { display: inline-flex; gap: 8px; align-items: center; color: var(--accent-hover); font-size: 16px; font-weight: 700; white-space: nowrap; }
+	.text-link:hover { text-decoration-thickness: 2px; }
+	.experiment-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+	.experiment-card { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); transition: transform var(--duration-ui) var(--ease-spring); }
+	.experiment-card:hover { transform: translateY(-3px); }
+	.preview-link { display: block; overflow: hidden; border-bottom: 1px solid var(--border); }
+	.preview-link :global(.project-preview) { transition: transform var(--duration-ui) var(--ease-spring); }
+	.experiment-card:hover .preview-link :global(.project-preview) { transform: scale(1.02); }
+	.card-content { display: flex; flex-direction: column; align-items: flex-start; min-height: 326px; padding: 24px; }
+	.experiment-top { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+	.experiment-number { color: var(--text-muted); font: 500 12px/1.3 var(--font-mono); letter-spacing: 0.025em; white-space: nowrap; }
+	.category-tag { display: inline-flex; align-items: center; min-height: 28px; padding: 4px 8px; border-radius: 8px; color: var(--accent-hover); background: var(--sprout); font-size: var(--type-tag); font-weight: 700; }
+	.category-tag.product { color: var(--ink); background: var(--coral); }
+	.experiment-status { display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 4px 8px; border-radius: 8px; background: var(--ochre); color: var(--ink); font-size: var(--type-tag); font-weight: 650; }
+	.experiment-status i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink); }
+	.experiment-card h3 { margin: 12px 0 8px; font-size: 24px; line-height: 1.1; letter-spacing: -0.045em; }
+	.experiment-card h3 a { color: var(--ink); }
+	.experiment-card h3 a:hover { color: var(--accent-hover); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+	.experiment-lines { display: grid; gap: 8px; width: 100%; }
+	.experiment-lines p { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 8px; overflow: hidden; color: var(--text-muted); font-size: 15px; line-height: 1.4; }
+	.experiment-lines strong { color: var(--ink); font: 500 12px/1.6 var(--font-mono); text-transform: uppercase; }
+	.experiment-lines p span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.focus-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+	.focus-chips span { padding: 5px 8px; border: 1px solid var(--border); border-radius: 8px; color: #43443d; background: #f8f4ec; font-size: 13px; line-height: 1.3; }
+	.card-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); }
+	.card-footer time { color: var(--text-muted); font: 500 12px/1.4 var(--font-mono); white-space: nowrap; }
+	.card-footer a { display: inline-flex; align-items: center; gap: 6px; color: var(--accent-hover); font-size: 16px; font-weight: 700; white-space: nowrap; }
+	.card-footer a:hover { text-decoration: underline; }
+	.blog-section { padding-top: 72px; }
 	.blog-list { border-top: 1px solid var(--border); }
-	.blog-row { display: grid; grid-template-columns: 120px minmax(0, 1fr) 30px; gap: 1.25rem; align-items: center; padding: 1.25rem 0.25rem; border-bottom: 1px solid var(--border); color: inherit; transition: background 180ms ease, padding 180ms ease; animation-delay: var(--delay, 0ms); }
-	.blog-row:hover { padding-inline: 0.75rem; background: rgba(255, 255, 255, 0.72); text-decoration: none; }
-	.blog-row time { color: var(--text-muted); font-size: 0.78rem; }
-	.blog-row-copy { display: grid; gap: 0.2rem; }
-	.blog-row-copy strong { color: var(--text); font: 600 1.08rem 'Space Grotesk', sans-serif; }
-	.blog-row-copy small { overflow: hidden; color: var(--text-muted); font-size: 0.82rem; text-overflow: ellipsis; white-space: nowrap; }
-	.row-arrow { justify-self: end; color: var(--accent); font-size: 1.1rem; transition: transform 180ms ease; }
+	.blog-row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; align-items: center; padding: 24px 8px; border-bottom: 1px solid var(--border); color: inherit; transition: transform var(--duration-ui) var(--ease-spring), opacity var(--duration-ui) ease; }
+	.blog-row:hover { transform: translateX(4px); text-decoration: none; }
+	.blog-row-meta { grid-column: 1 / span 3; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--text-muted); font: 500 12px/1.4 var(--font-mono); }
+	.language-tag { padding: 3px 6px; border-radius: 6px; background: var(--sprout); color: var(--accent-hover); font-size: 12px; font-weight: 600; }
+	.read-time { white-space: nowrap; }
+	.blog-row-copy { grid-column: 4 / span 8; display: grid; gap: 4px; }
+	.blog-row-copy strong { color: var(--ink); font: 600 20px/1.2 var(--font-display); }
+	.blog-row-copy small { overflow: hidden; color: var(--text-muted); font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+	.row-arrow { grid-column: 12; justify-self: end; color: var(--accent-hover); transition: transform var(--duration-ui) var(--ease-spring); }
+	.row-arrow :global(svg) { width: 18px; height: 18px; }
 	.blog-row:hover .row-arrow { transform: translate(2px, -2px); }
-	.blog-empty { padding: 1.4rem 0; color: var(--text-muted); }
-	.maker-section { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 1.4rem; align-items: center; margin: 5.5rem 0 0; padding: 2.1rem; border-radius: 1.5rem; background: #eeebfb; }
-	.maker-mark { display: grid; place-items: center; width: 4.2rem; aspect-ratio: 1; border-radius: 1.35rem; background: var(--accent); color: white; font: 700 2rem 'Space Grotesk', sans-serif; letter-spacing: -0.08em; transform: rotate(-5deg); }
-	.maker-section .eyebrow { margin-bottom: 0.35rem; }
-	.maker-section h2 { font-size: 2rem; }
-	.maker-section p:not(.eyebrow) { max-width: 580px; margin-top: 0.4rem; color: #555e72; font-size: 0.91rem; }
-	.button-dark { color: white; background: var(--text); white-space: nowrap; }
-	.button-dark:hover { color: white; background: #303b54; }
-	.mobile-break { display: none; }
-	@media (max-width: 900px) {
-		.hero { min-height: 520px; grid-template-columns: 1fr 0.85fr; gap: 0.5rem; }
-		h1 { font-size: clamp(3.6rem, 8vw, 5.5rem); }
-		.art-card { width: 205px; min-height: 225px; }
-		.card-front strong { font-size: 2.15rem; }
-		.experiment-grid { gap: 0.7rem; }
-		.experiment-card { padding: 1.1rem; }
-		.maker-section { grid-template-columns: auto 1fr; }
+	.blog-empty { padding: 20px 0; color: var(--text-muted); }
+	.maker-section { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: center; margin: 72px 0 0; padding: 24px; border: 1px solid #b6d39c; border-radius: var(--radius); background: var(--sprout); }
+	.maker-mark { display: grid; place-items: center; width: 64px; height: 64px; border-radius: var(--radius); background: var(--accent); color: white; font: 700 30px/1 var(--font-display); letter-spacing: -0.08em; }
+	.maker-mark { grid-column: 1; }
+	.maker-section > div:nth-child(2) { grid-column: 2 / span 7; }
+	.maker-section .eyebrow { margin-bottom: 8px; color: var(--accent-hover); }
+	.maker-section h2 { font-size: 32px; }
+	.maker-section p:not(.eyebrow) { max-width: 620px; margin-top: 8px; color: #34372f; font-size: 17px; line-height: 1.5; }
+	.button-dark { grid-column: 9 / span 4; color: var(--paper); background: var(--ink); }
+	.button-dark:hover { color: var(--paper); background: #30302a; }
+	.mobile-break { display: block; }
+	:global(.reveal.reveal-ready) { opacity: 0; transform: translateY(16px); transition: opacity 320ms var(--ease-spring) var(--delay, 0ms), transform 320ms var(--ease-spring) var(--delay, 0ms); }
+	:global(.reveal.is-visible) { opacity: 1; transform: translateY(0); }
+	@media (min-width: 640px) {
+		.home-page { width: min(100% - 48px, 1180px); }
+		.hero { gap: 16px; padding: 56px 0 40px; }
+		h1 { font-size: var(--type-hero-desktop); }
+		.hero-art { width: min(100%, 440px); }
+		.experiment-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+		.experiment-card { grid-column: span 6; }
+		.card-content { min-height: 330px; }
+		.maker-section { padding: 32px; }
+		.mobile-break { display: none; }
+	}
+	@media (min-width: 960px) {
+		.hero { min-height: 580px; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding: 64px 0 48px; }
+		.hero-copy { grid-column: 1 / span 7; }
+		.hero-art { grid-column: 8 / span 5; justify-self: end; width: min(100%, 460px); }
+		.experiment-card { grid-column: span 4; }
+		.card-content { min-height: 348px; }
+	}
+	@media (min-width: 640px) and (max-width: 959px) {
+		.maker-section { grid-template-columns: auto minmax(0, 1fr); gap: 24px; }
+		.maker-section > div:nth-child(2) { grid-column: 2; }
 		.button-dark { grid-column: 2; justify-self: start; }
 	}
-	@media (max-width: 640px) {
-		.home-page { width: min(100% - 1.5rem, 520px); }
-		.hero { min-height: auto; grid-template-columns: 1fr; gap: 0.6rem; padding: 3.5rem 0 2rem; }
-		.hero-copy { order: 0; }
-		h1 { font-size: clamp(3.65rem, 17vw, 5.3rem); }
-		.hero-lead { margin: 1.15rem 0 1.3rem; font-size: 1.03rem; }
+	@media (max-width: 639px) {
 		.hero-actions { flex-direction: column; align-items: stretch; }
 		.hero-actions .button { justify-content: space-between; }
-		.hero-note { margin-top: 1.4rem; }
-		.hero-art { width: min(100%, 370px); justify-self: center; margin: 0.8rem 0 0.6rem; }
-		.art-card { width: 190px; min-height: 210px; }
-		.card-front strong { font-size: 2rem; }
-		.art-sticker { right: 0; width: 68px; height: 68px; font-size: 0.55rem; }
-		.focus-line { align-items: flex-start; flex-direction: column; padding: 1rem 0.2rem; font-size: 0.8rem; }
-		.focus-line div { gap: 0.45rem; font-size: 0.78rem; }
-		.section { padding-top: 3.7rem; }
-		.section-heading { align-items: flex-start; flex-direction: column; gap: 0.8rem; margin-bottom: 1.1rem; }
-		.section-heading h2 { font-size: 2.25rem; }
-		.mobile-break { display: block; }
-		.experiment-grid { grid-template-columns: 1fr; }
-		.experiment-card { min-height: 0; padding: 1.2rem; }
-		.experiment-card p { margin-bottom: 1rem; }
-		.blog-row { grid-template-columns: 1fr 28px; gap: 0.25rem 0.8rem; padding: 1rem 0.15rem; }
-		.blog-row time { grid-column: 1; grid-row: 1; }
+		.hero-art { width: min(100%, 380px); margin: 12px auto 0; }
+		.art-card { width: 62%; min-height: 210px; padding: 16px; }
+		.card-back strong { font-size: 28px; }
+		.card-front strong { font-size: 32px; }
+		.art-sticker { right: 0; bottom: 5%; width: 68px; height: 68px; font-size: 12px; }
+		.focus-line { align-items: flex-start; flex-direction: column; padding: 16px 0; font-size: 15px; }
+		.focus-line div { gap: 8px; font-size: 16px; }
+		.section { padding-top: 48px; }
+		.section-heading { align-items: flex-start; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+		.section-heading h2 { font-size: 36px; }
+		.card-content { min-height: 0; padding: 16px; }
+		.experiment-card h3 { font-size: 22px; }
+		.experiment-lines p { grid-template-columns: 72px minmax(0, 1fr); font-size: 16px; }
+		.focus-chips { margin: 12px 0; }
+		.card-footer { align-items: flex-start; flex-direction: column; gap: 8px; }
+		.blog-row { grid-template-columns: minmax(0, 1fr) 24px; gap: 8px 12px; padding: 16px 4px; }
+		.blog-row-meta { grid-column: 1; grid-row: 1; gap: 8px; }
 		.blog-row-copy { grid-column: 1; grid-row: 2; }
-		.blog-row-copy strong { font-size: 1rem; }
-		.blog-row-copy small { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+		.blog-row-copy strong { font-size: 18px; }
+		.blog-row-copy small { display: -webkit-box; white-space: normal; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 		.row-arrow { grid-column: 2; grid-row: 1 / 3; }
-		.maker-section { grid-template-columns: auto 1fr; gap: 1rem; margin-top: 3.6rem; padding: 1.25rem; }
-		.maker-mark { width: 3.1rem; border-radius: 1rem; font-size: 1.5rem; }
-		.maker-section h2 { font-size: 1.65rem; }
-		.maker-section p:not(.eyebrow) { font-size: 0.85rem; }
+		.maker-section { grid-template-columns: auto minmax(0, 1fr); margin-top: 48px; gap: 16px; padding: 16px; }
+		.maker-mark { grid-column: 1; }
+		.maker-section > div:nth-child(2) { grid-column: 2; }
+		.maker-mark { width: 48px; height: 48px; font-size: 24px; }
+		.maker-section h2 { font-size: 26px; }
+		.maker-section p:not(.eyebrow) { font-size: 17px; }
 		.button-dark { grid-column: 1 / -1; justify-self: stretch; }
+	}
+	@media (pointer: coarse) {
+		.art-card:active { animation: sticker-wobble 280ms var(--ease-spring) both; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.hero-word, .art-card, .art-sticker { animation: none; opacity: 1; transform: none; }
+		:global(.reveal.reveal-ready) { opacity: 1; transform: none; transition: none; }
 	}
 </style>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
+	import { detectLanguage, estimateReadingMinutes } from "$lib/blog-meta";
 	import { canonicalUrl, defaultDescription, jsonLd, ogImageUrl, siteName } from "$lib/seo";
 	import { onDestroy } from "svelte";
 
@@ -155,7 +156,8 @@
 				<article class="post-card">
 					<div class="post-topline">
 						<time>{new Date(post.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</time>
-						<span class="pill">Blog post</span>
+						<span class="language-tag">{detectLanguage(post.content)}</span>
+						<span class="read-time">{estimateReadingMinutes(post.content)} min read</span>
 					</div>
 					<h2><a href={"/blog/" + post.slug}>{post.title}</a></h2>
 					{#if post.excerpt}
@@ -204,10 +206,8 @@
 		align-items: end;
 		padding: 2rem;
 		border: 1px solid var(--border);
-		border-radius: calc(var(--radius) * 1.5);
-		background:
-			radial-gradient(circle at top left, rgba(124, 58, 237, 0.16), transparent 42%),
-			linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(250, 250, 255, 0.8));
+		border-radius: var(--radius);
+		background: var(--card);
 		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.06);
 	}
 
@@ -217,8 +217,8 @@
 		gap: 0.4rem;
 		text-transform: uppercase;
 		letter-spacing: 0.18em;
-		font-size: 0.72rem;
-		color: var(--accent);
+		font-size: 12px;
+		color: var(--accent-hover);
 		font-weight: 700;
 		margin-bottom: 0.75rem;
 	}
@@ -232,7 +232,7 @@
 	.subtitle {
 		max-width: 58ch;
 		color: var(--text-muted);
-		font-size: 1.02rem;
+		font-size: 1.0625rem;
 	}
 
 	.hero-stats {
@@ -245,15 +245,14 @@
 	.stat {
 		min-width: 110px;
 		padding: 0.95rem 1rem;
-		border-radius: 1rem;
-		background: rgba(255, 255, 255, 0.72);
+		border-radius: var(--radius);
+		background: var(--card);
 		border: 1px solid var(--border);
-		backdrop-filter: blur(10px);
 	}
 
 	.stat-label {
 		display: block;
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		color: var(--text-muted);
@@ -281,7 +280,7 @@
 	}
 
 	.search span {
-		font-size: 0.78rem;
+		font-size: 0.8125rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
@@ -292,8 +291,8 @@
 		width: 100%;
 		padding: 0.9rem 1rem;
 		border: 1px solid var(--border);
-		border-radius: 1rem;
-		background: rgba(255, 255, 255, 0.92);
+		border-radius: var(--radius);
+		background: var(--card);
 		color: var(--text);
 		font-size: 1rem;
 		box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
@@ -308,21 +307,19 @@
 	.page-step,
 	.page-number {
 		border: 1px solid var(--border);
-		background: rgba(255, 255, 255, 0.92);
+		background: var(--card);
 		color: var(--text);
-		border-radius: 999px;
+		border-radius: var(--radius);
 		padding: 0.8rem 1rem;
 		font-weight: 600;
 		cursor: pointer;
-		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+		transition: transform var(--duration-ui) var(--ease-spring);
 	}
 
 	.ghost-button:hover,
 	.page-step:hover,
 	.page-number:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-		border-color: color-mix(in srgb, var(--accent) 24%, var(--border));
 	}
 
 	.ghost-button:disabled,
@@ -341,9 +338,9 @@
 
 	.state-card {
 		padding: 2rem;
-		border-radius: 1.25rem;
+		border-radius: var(--radius);
 		border: 1px solid var(--border);
-		background: rgba(255, 255, 255, 0.88);
+		background: var(--card);
 		text-align: center;
 		color: var(--text-muted);
 	}
@@ -354,46 +351,35 @@
 
 	.posts {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 1rem;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0;
 		margin-top: 0.75rem;
+		border-top: 1px solid var(--border);
 	}
 
 	.post-card {
-		padding: 1.3rem;
-		border-radius: 1.25rem;
-		border: 1px solid var(--border);
-		background:
-			linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 252, 255, 0.94));
-		box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
-		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		padding: 1.3rem 0.5rem;
+		border-bottom: 1px solid var(--border);
+		background: transparent;
+		transition: transform var(--duration-ui) var(--ease-spring);
 	}
 
 	.post-card:hover {
-		transform: translateY(-3px);
-		box-shadow: 0 22px 44px rgba(15, 23, 42, 0.09);
+		transform: translateX(3px);
 	}
 
 	.post-topline {
 		display: flex;
-		justify-content: space-between;
+		justify-content: flex-start;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.6rem;
 		margin-bottom: 0.75rem;
 		color: var(--text-muted);
 		font-size: 0.82rem;
 	}
 
-	.pill {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.32rem 0.7rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--accent) 10%, white);
-		color: var(--accent);
-		font-size: 0.72rem;
-		font-weight: 700;
-	}
+	.language-tag { padding: 3px 6px; border-radius: 6px; background: var(--sprout); color: var(--accent-hover); font: 600 12px/1.3 var(--font-mono); }
+	.read-time { color: var(--text-muted); font: 500 12px/1.4 var(--font-mono); white-space: nowrap; }
 
 	h2 {
 		margin-bottom: 0.55rem;
@@ -406,7 +392,7 @@
 	}
 
 	h2 a:hover {
-		color: var(--accent);
+		color: var(--accent-hover);
 		text-decoration: none;
 	}
 
@@ -431,8 +417,8 @@
 		margin-top: 1.4rem;
 		padding: 1rem;
 		border: 1px solid var(--border);
-		border-radius: 1.1rem;
-		background: rgba(255, 255, 255, 0.76);
+		border-radius: var(--radius);
+		background: var(--card);
 	}
 
 	.page-numbers {
@@ -486,5 +472,13 @@
 		.ghost-button {
 			width: 100%;
 		}
+
+		.post-topline {
+			flex-wrap: wrap;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.post-card, .ghost-button, .page-step, .page-number { transition: none; }
 	}
 </style>

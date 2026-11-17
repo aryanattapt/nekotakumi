@@ -101,9 +101,9 @@
 	.eyebrow {
 		text-transform: uppercase;
 		letter-spacing: 0.18em;
-		font-size: 0.72rem;
+		font-size: 12px;
 		font-weight: 700;
-		color: var(--accent);
+		color: var(--accent-hover);
 		margin-bottom: 0.75rem;
 	}
 

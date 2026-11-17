@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import ArrowIcon from '$lib/components/ArrowIcon.svelte';
 	import { canonicalUrl, jsonLd, ogImageUrl, siteName } from '$lib/seo';
 
 	const description = 'The story behind Nekotakumi Labs: a personal space for software experiments, side projects, and learning by building.';
@@ -51,7 +52,7 @@
 			<h2>Hi, I’m Arya.</h2>
 			<p>I’m a software developer with a background in backend systems, integrations, and business applications. Outside of work, I like exploring new tools and seeing how far a small idea can go.</p>
 			<p>This site is part portfolio, part notebook, and part excuse to keep building.</p>
-			<a class="about-link" href="https://aryanattapt.id/" target="_blank" rel="noopener noreferrer">Visit my portfolio <span aria-hidden="true">↗</span></a>
+			<a class="about-link" href="https://aryanattapt.id/" target="_blank" rel="noopener noreferrer">Visit my portfolio <ArrowIcon /></a>
 		</div>
 	</section>
 
@@ -65,24 +66,24 @@
 
 	<section class="about-end">
 		<p>Curious about something?</p>
-		<a href="/blog">Take a look around the blog <span aria-hidden="true">↗</span></a>
+		<a href="/blog">Take a look around the blog <ArrowIcon /></a>
 	</section>
 </div>
 
 <style>
 	.about-page { width: min(100% - 2rem, 940px); margin: 0 auto; padding: 3.7rem 0 1rem; }
 	.about-hero { padding: 2rem 0 4.5rem; }
-	.eyebrow { margin-bottom: 1rem; color: var(--accent); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+	.eyebrow { margin-bottom: 1rem; color: var(--accent-hover); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 	h1 { font-size: clamp(4rem, 9vw, 7.4rem); line-height: 0.91; letter-spacing: -0.08em; }
-	h1 span { color: var(--accent); }
-	.about-hero > p:last-child { max-width: 600px; margin-top: 1.4rem; color: var(--text-muted); font-size: 1.15rem; line-height: 1.7; }
+	h1 span { color: var(--accent-hover); }
+	.about-hero > p:last-child { max-width: 600px; margin-top: 1.4rem; color: var(--text-muted); font-size: 1.125rem; line-height: 1.7; }
 	.about-copy { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 2rem; padding: 2.4rem 0; border-top: 1px solid var(--border); }
 	.section-label { display: flex; align-items: baseline; gap: 0.65rem; color: var(--text-muted); font-size: 0.82rem; }
 	.section-label span:first-child { color: var(--coral); font: 700 0.72rem ui-monospace, monospace; }
 	.prose h2 { max-width: 620px; margin-bottom: 0.9rem; font-size: clamp(1.65rem, 3vw, 2.3rem); line-height: 1.15; }
-	.prose p { max-width: 640px; margin-bottom: 0.85rem; color: #586277; line-height: 1.8; }
-	.about-link, .about-end a { display: inline-flex; align-items: center; gap: 0.55rem; margin-top: 0.6rem; color: var(--accent); font-weight: 700; }
-	.about-end { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 2.2rem; padding: 1.4rem 1.5rem; border-radius: 1.2rem; background: #eeebfb; }
+	.prose p { max-width: 640px; margin-bottom: 0.85rem; color: var(--text-muted); font-size: 17px; line-height: 1.8; }
+	.about-link, .about-end a { display: inline-flex; align-items: center; gap: 0.55rem; margin-top: 0.6rem; color: var(--accent-hover); font-weight: 700; }
+	.about-end { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 2.2rem; padding: 1.4rem 1.5rem; border: 1px solid #b6d39c; border-radius: var(--radius); background: var(--sprout); }
 	.about-end p { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 600; }
 	.about-end a { margin: 0; }
 	@media (max-width: 640px) {

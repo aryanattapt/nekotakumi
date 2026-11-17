@@ -65,7 +65,7 @@
 	}
 	.btn {
 		padding: 0.5rem 1rem;
-		background: var(--accent, #7c3aed);
+		background: var(--accent, #2f7d4a);
 		color: #fff;
 		border: none;
 		border-radius: 8px;
@@ -75,6 +75,6 @@
 		white-space: nowrap;
 	}
 	.btn:hover {
-		background: var(--accent-hover, #6d28d9);
+		background: var(--accent-hover, #1f5a35);
 	}
 </style>

@@ -28,7 +28,7 @@
 		padding: 1rem 1.2rem;
 		border: 1px solid var(--border);
 		border-radius: calc(var(--radius) * 1.1);
-		background: linear-gradient(115deg, rgba(237, 232, 255, 0.85), rgba(238, 249, 255, 0.8) 62%, rgba(255, 255, 255, 0.86));
+		background: var(--card);
 		box-shadow: 0 12px 28px rgba(24, 32, 51, 0.045);
 	}
 	.top-bar h1 {
