@@ -200,7 +200,7 @@
 
 	<section class="maker-section reveal" use:revealOnce>
 		<div class="maker-mark" aria-hidden="true">a.</div>
-		<div><p class="eyebrow">The person behind the tabs</p><h2>Hey, I’m Arya.</h2><p>I’m a software developer who likes trying things out, learning as I go, and occasionally making a mess before it makes sense.</p></div>
+		<div><p class="eyebrow">The person behind the tabs</p><h2>Hey, I’m Arya.</h2><p>I work across product engineering and systems analysis, with 6+ years in FMCG technology. This lab is where I test ideas through small prototypes and AI automation.</p></div>
 		<a class="button button-dark" href="/tentang">A little more about me <ArrowIcon /></a>
 	</section>
 </div>

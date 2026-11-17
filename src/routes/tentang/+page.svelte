@@ -50,9 +50,10 @@
 		<div class="section-label"><span>02</span><span>The person behind it</span></div>
 		<div class="prose">
 			<h2>Hi, I’m Arya.</h2>
-			<p>I’m a software developer with a background in backend systems, integrations, and business applications. Outside of work, I like exploring new tools and seeing how far a small idea can go.</p>
-			<p>This site is part portfolio, part notebook, and part excuse to keep building.</p>
-			<a class="about-link" href="https://aryanattapt.id/" target="_blank" rel="noopener noreferrer">Visit my portfolio <ArrowIcon /></a>
+			<p class="maker-roles">Product Engineer · Business Analysis · Systems Analysis · R&amp;D</p>
+			<p>I’ve spent 6+ years in FMCG technology, working across inventory, sales, reporting, and digital payments. I like turning the needs behind those workflows into systems people can use.</p>
+			<p>Outside of work, I use this lab for R&amp;D: quick prototypes, AI automation, and small tools that help me learn whether an idea holds up.</p>
+			<a class="about-link" href="https://aryanattapt.id/" target="_blank" rel="noopener noreferrer">Visit aryanattapt.id <ArrowIcon /></a>
 		</div>
 	</section>
 
@@ -81,6 +82,7 @@
 	.section-label { display: flex; align-items: baseline; gap: 0.65rem; color: var(--text-muted); font-size: 0.82rem; }
 	.section-label span:first-child { color: var(--coral); font: 700 0.72rem ui-monospace, monospace; }
 	.prose h2 { max-width: 620px; margin-bottom: 0.9rem; font-size: clamp(1.65rem, 3vw, 2.3rem); line-height: 1.15; }
+	.maker-roles { margin-bottom: 0.85rem; color: var(--accent-hover); font: 500 12px/1.5 var(--font-mono); letter-spacing: 0.025em; }
 	.prose p { max-width: 640px; margin-bottom: 0.85rem; color: var(--text-muted); font-size: 17px; line-height: 1.8; }
 	.about-link, .about-end a { display: inline-flex; align-items: center; gap: 0.55rem; margin-top: 0.6rem; color: var(--accent-hover); font-weight: 700; }
 	.about-end { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 2.2rem; padding: 1.4rem 1.5rem; border: 1px solid #b6d39c; border-radius: var(--radius); background: var(--sprout); }
