@@ -181,13 +181,14 @@ export async function getDailySummary(
 		params.push(start, end);
 	}
 
-	const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+	const where = conditions.length > 0
+		? `WHERE ${conditions.join(' AND ')} AND t.sumber NOT IN ('TOKOPEDIA', 'GRAB')`
+		: "WHERE t.sumber NOT IN ('TOKOPEDIA', 'GRAB')";
 
 	const data = await sql.unsafe<{ date: string; sumber: string; count: number; total: number }[]>(
 		`SELECT t.tanggal::text as date, t.sumber, COUNT(*)::int as count, COALESCE(SUM(t.jumlah), 0)::numeric as total
 		FROM finansial.transaksi t
 		${where}
-		AND t.sumber NOT IN ('TOKOPEDIA', 'GRAB')
 		GROUP BY t.tanggal, t.sumber
 		ORDER BY t.tanggal, t.sumber`,
 		params
@@ -226,13 +227,14 @@ export async function getMonthlySummary(
 		params.push(start, end);
 	}
 
-	const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+	const where = conditions.length > 0
+		? `WHERE ${conditions.join(' AND ')} AND t.sumber NOT IN ('TOKOPEDIA', 'GRAB')`
+		: "WHERE t.sumber NOT IN ('TOKOPEDIA', 'GRAB')";
 
 	const data = await sql.unsafe<{ month: string; sumber: string; count: number; total: number }[]>(
 		`SELECT TO_CHAR(t.tanggal, 'YYYY-MM') as month, t.sumber, COUNT(*)::int as count, COALESCE(SUM(t.jumlah), 0)::numeric as total
 		FROM finansial.transaksi t
 		${where}
-		AND t.sumber NOT IN ('TOKOPEDIA', 'GRAB')
 		GROUP BY TO_CHAR(t.tanggal, 'YYYY-MM'), t.sumber
 		ORDER BY month, t.sumber`,
 		params
@@ -270,13 +272,14 @@ export async function getYearlySummary(
 		params.push(start, end);
 	}
 
-	const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+	const where = conditions.length > 0
+		? `WHERE ${conditions.join(' AND ')} AND t.sumber NOT IN ('TOKOPEDIA', 'GRAB')`
+		: "WHERE t.sumber NOT IN ('TOKOPEDIA', 'GRAB')";
 
 	const data = await sql.unsafe<{ year: string; sumber: string; count: number; total: number }[]>(
 		`SELECT TO_CHAR(t.tanggal, 'YYYY') as year, t.sumber, COUNT(*)::int as count, COALESCE(SUM(t.jumlah), 0)::numeric as total
 		FROM finansial.transaksi t
 		${where}
-		AND t.sumber NOT IN ('TOKOPEDIA', 'GRAB')
 		GROUP BY TO_CHAR(t.tanggal, 'YYYY'), t.sumber
 		ORDER BY year, t.sumber`,
 		params

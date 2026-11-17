@@ -27,6 +27,17 @@ export function getOffset(page: number, limit: number): number {
 	return (Math.max(1, page) - 1) * Math.max(1, limit);
 }
 
+/**
+ * Build a date-only range for the current calendar month without converting
+ * local midnight through UTC (which can shift the date by one day).
+ */
+export function getCurrentMonthDateRange(today: Date = new Date()): { start: string; end: string } {
+	const formatDate = (date: Date) =>
+		`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+	const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+	return { start: formatDate(firstDay), end: formatDate(today) };
+}
+
 export function getTotalPages(total: number, limit: number): number {
 	if (total <= 0) return 0;
 	return Math.ceil(total / Math.max(1, limit));

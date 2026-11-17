@@ -5,8 +5,9 @@ import { eq } from "drizzle-orm";
 import { verifyAuth } from "$lib/server/expense-tracker/auth";
 
 function parseId(value: string) {
-	const id = Number.parseInt(value, 10);
-	return Number.isFinite(id) ? id : null;
+	if (!/^[1-9]\d*$/.test(value)) return null;
+	const id = Number(value);
+	return Number.isSafeInteger(id) ? id : null;
 }
 
 export async function GET({ params, request }) {
